@@ -1,0 +1,10 @@
+# 환경 및 의존성 관련 파일
+/node_modules
+npm-debug.log
+
+# 로컬 설정 파일
+.env
+
+# 빌드 파일 및 로그
+/build
+/logs
