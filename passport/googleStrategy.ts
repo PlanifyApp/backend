@@ -1,26 +1,38 @@
 import { PassportStatic } from "passport";
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
-interface User {
+type ProfileType = {
     id: string;
-    // 다른 사용자 정보 필드들...
+    emails: {value: string, verified: boolean}[];
+    photos: {value: string}[];
 }
 
-var passportConfig = function(passport: PassportStatic){
+var googlePassportConfig = function(passport: PassportStatic){
     passport.use(new GoogleStrategy(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             callbackURL: process.env.GOOGLE_CALLBACK_URL,
         },
-        (accessToken: string, refreshToken: string, profile: object, done: (err: Error | null, user?: User | null, info?: any) => void) => {
-            done(null, profile as User); // profile을 User 타입으로 캐스팅하여 전달
+        (accessToken: string, refreshToken: string, profile: ProfileType, done: (err: Error | null, user?: string | null, info?: any) => void) => {
+            // User.findOrCreate(({ googleId: profile.id }, function(err, user){
+            //     return cb(err, user)
+            // }));
         }
     ));
 
-    passport.serializeUser(function(user: User, done: (err: Error | null, id?: string) => void) {
-        done(null, user.id);
+    passport.serializeUser(function(user, done) {    
+        console.log('serialize');
+        console.log(user);
+        done(null, user);
+    });
+
+    passport.deserializeUser(function(id, done) {
+        // User.findById(id, function(err, user)){
+        //     console.log(user);
+        //     done(null, user);
+        // }
     });
 }
 
-module.exports = passportConfig;
+export default googlePassportConfig;

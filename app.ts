@@ -1,18 +1,18 @@
 import dotenv from 'dotenv';
-
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var session = require('express-session');
-var cors = require('cors');
-var passport = require('passport');
-import passportConfig from './passport/';
-
 dotenv.config();
 
-var indexRouter = require('./routes/index');
-var app = express();
+import express from 'express';
+import logger from 'morgan';
+import cookieParser from 'cookie-parser';
+import path from 'path';
+import session from 'express-session';
+import cors from 'cors';
+import passport from 'passport';
+import googlePassportConfig from './passport/googleStrategy';
+import indexRouter from './routes/index';
+import { connectToMongoDB } from './db';
+
+const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -21,15 +21,17 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 app.use(session({
-  secret: process.env.SESSION_SECRET_KEY,
+  secret: process.env.SESSION_SECRET_KEY || 'default-secret-key',
   resave: false,
   saveUninitialized: false
 }));
 
-passportConfig(passport);
+googlePassportConfig(passport);
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/api', indexRouter);
+
+connectToMongoDB();
 
 module.exports = app;

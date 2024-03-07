@@ -8,7 +8,7 @@ var router = express.Router();
 router.get('/google', passport.authenticate('google', {scope: ['profile', 'email']}));
 
 router.get('/google/callback', passport.authenticate('google', {failureRedirect: '/'}), function(req:Request, res:Response, next:NextFunction) {
-    console.log('성공:', res)
+    console.log('성공')
 });
 
 module.exports = router;

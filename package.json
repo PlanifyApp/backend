@@ -18,10 +18,17 @@
     "express-session": "^1.18.0",
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
+    "mongoose": "^8.2.1",
     "morgan": "~1.9.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express-session": "^1.18.0",
+    "@types/morgan": "^1.9.9"
   }
 }
