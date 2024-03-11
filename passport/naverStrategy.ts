@@ -1,31 +1,32 @@
 import { PassportStatic } from "passport";
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const NaverStrategy = require("passport-naver").Strategy;
 
 type ProfileType = {
     id: string;
     provider: string;
     _json: {
-        name: string;
+        id: string;
+        nickname: string;
         email: string;
-        picture: string;
+        profile_image: string;
     };
 };
 
-var googlePassportConfig = function (passport: PassportStatic) {
+var naverPassportConfig = function (passport: PassportStatic) {
     passport.use(
-        new GoogleStrategy(
+        new NaverStrategy(
             {
-                clientID: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: process.env.GOOGLE_CALLBACK_URL,
+                clientID: process.env.NAVER_CLIENT_ID,
+                clientSecret: process.env.NAVER_CLIENT_SECRET,
+                callbackURL: process.env.NAVER_CALLBACK_URL,
             },
             (accessToken: string, refreshToken: string, profile: ProfileType, done: (err: Error | null, user?: string | null, info?: any) => void) => {
-                // 구글 로그인 성공 시 데이터 생성
+                // 네이버 로그인 성공 시 데이터 생성
                 const userData = {
-                    googleId: profile.id,
-                    name: profile._json.name,
+                    naverId: profile.id,
+                    name: profile._json.nickname,
                     email: profile._json.email,
-                    profile: profile._json.picture,
+                    profile: profile._json.profile_image,
                     type: profile.provider,
                 };
 
@@ -38,4 +39,4 @@ var googlePassportConfig = function (passport: PassportStatic) {
     );
 };
 
-export default googlePassportConfig;
+export default naverPassportConfig;
