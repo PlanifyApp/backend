@@ -1,25 +1,41 @@
 import mongoose, { Schema } from "mongoose";
 
-export interface IUser extends Document {
+export interface User extends Document {
     id: string;
     email: string;
-    photo: string;
+    profile_image: string;
+    nickname: string;
+    name: string;
+    type: string;
 }
 
 const UserSchema: Schema = new Schema({
     id: {
         type: String,
-        required: true
+        required: true,
+        unique: true,
     },
     email: {
         type: String,
-        required: true
+        required: true,
     },
-    photo: {
+    profile_image: {
         type: String,
-        required: true
-    }
-})
+        required: false,
+    },
+    nickname: {
+        type: String,
+        required: false,
+    },
+    name: {
+        type: String,
+        required: false,
+    },
+    type: {
+        type: String,
+        required: true,
+    },
+});
 
-const User = mongoose.model<IUser>('User', UserSchema);
+const User = mongoose.model<User>("User", UserSchema);
 export default User;

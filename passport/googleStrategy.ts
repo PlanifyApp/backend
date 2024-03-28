@@ -1,4 +1,5 @@
 import { PassportStatic } from "passport";
+import User from "../models/User";
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 type ProfileType = {
@@ -19,20 +20,33 @@ var googlePassportConfig = function (passport: PassportStatic) {
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
                 callbackURL: process.env.GOOGLE_CALLBACK_URL,
             },
-            (accessToken: string, refreshToken: string, profile: ProfileType, done: (err: Error | null, user?: string | null, info?: any) => void) => {
-                // 구글 로그인 성공 시 데이터 생성
-                const userData = {
-                    googleId: profile.id,
-                    name: profile._json.name,
-                    email: profile._json.email,
-                    profile: profile._json.picture,
-                    type: profile.provider,
-                };
+            async (accessToken: string, refreshToken: string, profile: ProfileType, done: (err: Error | null | unknown, user?: string | null, info?: any) => void) => {
+                try {
+                    const userInfo = await User.findOne({ id: profile.id });
 
-                done(null, profile.id);
-                // User.findOrCreate((userData, function(err, user){
-                //     return cb(err, user)
-                // }));
+                    if (userInfo) {
+                        return done(null, profile.id);
+                    } else {
+                        const newUser = new User({
+                            id: profile.id,
+                            email: profile._json.email,
+                            profile_image: profile._json.picture,
+                            nickname: profile._json.name,
+                            name: profile._json.name,
+                            type: profile.provider,
+                        });
+                        const res = await newUser.save();
+
+                        if (res) {
+                            return done(null, profile.id);
+                        } else {
+                            return done(null, null);
+                        }
+                    }
+                } catch (error) {
+                    console.log(error);
+                    done(error);
+                }
             }
         )
     );

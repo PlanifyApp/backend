@@ -13,6 +13,7 @@ import naverPassportConfig from "./passport/naverStrategy";
 import indexRouter from "./routes/index";
 import { connectToMongoDB } from "./db";
 import kakaoPassportConfig from "./passport/kakaoStrategy";
+import User from "./models/User";
 
 const app = express();
 
@@ -38,16 +39,13 @@ naverPassportConfig(passport);
 kakaoPassportConfig(passport);
 
 passport.serializeUser(function (user, done) {
-    console.log("serialize");
-    console.log(user);
     done(null, user);
 });
 
 passport.deserializeUser(function (id: string, done) {
-    // User.findById(id, function(err, user)){
-    //     console.log(user);
-    done(null, id);
-    // }
+    User.findOne({ id: id })
+        .then((user) => done(null, user))
+        .catch((err) => done(err));
 });
 
 app.use("/api", indexRouter);
