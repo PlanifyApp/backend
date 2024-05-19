@@ -1,5 +1,6 @@
 import { PassportStatic } from "passport";
 import User from "../models/User";
+import { log } from "console";
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 type ProfileType = {
@@ -20,11 +21,18 @@ var googlePassportConfig = function (passport: PassportStatic) {
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
                 callbackURL: process.env.GOOGLE_CALLBACK_URL,
             },
-            async (accessToken: string, refreshToken: string, profile: ProfileType, done: (err: Error | null | unknown, user?: string | null, info?: any) => void) => {
+            async (
+                accessToken: string,
+                refreshToken: string,
+                profile: ProfileType,
+                done: (err: Error | null | unknown, user?: string | null, info?: any) => void
+            ) => {
                 try {
                     const userInfo = await User.findOne({ id: profile.id });
 
                     if (userInfo) {
+                        console.log("profileId,", profile.id);
+
                         return done(null, profile.id);
                     } else {
                         const newUser = new User({

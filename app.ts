@@ -15,38 +15,62 @@ import { connectToMongoDB } from "./db";
 import kakaoPassportConfig from "./passport/kakaoStrategy";
 import User from "./models/User";
 
-const app = express();
+// 세션 타입 확장
+declare module "express-session" {
+    interface Session {
+        passport: { user: string }; // 사용자 정의 타입 설정
+        user: number;
+    }
+}
 
+const app = express();
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(cors());
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET_KEY || "default-secret-key",
-        resave: false,
-        saveUninitialized: false,
-    })
-);
 
-app.use(passport.initialize());
-app.use(passport.session());
+var sess = {
+    secret: "keyboard cat",
+    cookie: { secure: false },
+};
+console.log(app.get("env"));
 
-googlePassportConfig(passport);
-naverPassportConfig(passport);
-kakaoPassportConfig(passport);
+if (app.get("env") === "production") {
+    app.set("trust proxy", 1); // trust first proxy
+    sess.cookie.secure = true; // serve secure cookies
+}
 
-passport.serializeUser(function (user, done) {
-    done(null, user);
-});
+app.use(session(sess));
 
-passport.deserializeUser(function (id: string, done) {
-    User.findOne({ id: id })
-        .then((user) => done(null, user))
-        .catch((err) => done(err));
-});
+// app.use(
+//     session({
+//         secret: process.env.SESSION_SECRET_KEY || "default-secret-key",
+//         resave: false,
+//         saveUninitialized: false,
+//         cookie: {
+//             secure: true,
+//         },
+//     })
+// );
+
+// app.use(passport.initialize());
+// app.use(passport.session());
+
+// googlePassportConfig(passport);
+// naverPassportConfig(passport);
+// kakaoPassportConfig(passport);
+
+// passport.serializeUser(function (user, done) {
+//     done(null, user);
+// });
+
+// passport.deserializeUser(function (id: string, done) {
+//     User.findById(id)
+//         .then((user) => done(null, user))
+//         .catch((err) => done(err));
+// });
 
 app.use("/api", indexRouter);
 

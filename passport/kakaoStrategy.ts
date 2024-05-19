@@ -1,4 +1,5 @@
 import { PassportStatic } from "passport";
+import User from "../models/User";
 const KakaoStrategy = require("passport-kakao").Strategy;
 
 type ProfileType = {
@@ -19,20 +20,39 @@ var kakaoPassportConfig = function (passport: PassportStatic) {
                 clientID: process.env.KAKAO_CLIENT_ID,
                 callbackURL: process.env.KAKAO_CALLBACK_URL,
             },
-            (accessToken: string, refreshToken: string, profile: ProfileType, done: (err: Error | null, user?: string | null, info?: any) => void) => {
-                // 카카오 로그인 성공 시 데이터 생성
-                console.log(profile);
-                const userData = {
-                    kakaoId: profile.id,
-                    name: profile._json.properties.nickname,
-                    profile: profile._json.properties.profile_image,
-                    type: profile.provider,
-                };
+            async (
+                accessToken: string,
+                refreshToken: string,
+                profile: ProfileType,
+                done: (err: Error | null | unknown, user?: string | null, info?: any) => void
+            ) => {
+                try {
+                    const userInfo = await User.findOne({ id: profile.id });
+                    if (userInfo) {
+                        return done(null, profile.id);
+                    } else {
+                        console.log(profile);
 
-                done(null, profile.id);
-                // User.findOrCreate((userData, function(err, user){
-                //     return cb(err, user)
-                // }));
+                        const newUser = new User({
+                            id: profile.id,
+                            // email: profile._json.email,
+                            profile_image: profile._json.properties.profile_image,
+                            nickname: profile._json.properties.nickname,
+                            // name: profile._json.name,
+                            type: profile.provider,
+                        });
+                        const res = await newUser.save();
+
+                        if (res) {
+                            return done(null, profile.id);
+                        } else {
+                            return done(null, null);
+                        }
+                    }
+                } catch (error) {
+                    console.log(error);
+                    done(error);
+                }
             }
         )
     );
