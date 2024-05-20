@@ -148,6 +148,7 @@ app.use(cors({ credentials: true }));
 
 passport.use(googlePassportConfig);
 passport.use(naverPassportConfig);
+passport.use(kakaoPassportConfig);
 
 passport.serializeUser(function (id: any, cb) {
     User.findById(id)
