@@ -1,9 +1,7 @@
 import express from "express";
-import session from "express-session";
+import { authRouter } from "./auth";
+import { userRouter } from "./user";
 const router = express.Router();
-
-var authRouter = require("./auth");
-var userRouter = require("./user");
 
 router.use("/auth", authRouter);
 router.use("/user", userRouter);

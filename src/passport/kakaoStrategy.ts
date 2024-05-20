@@ -1,25 +1,24 @@
 import { PassportStatic } from "passport";
-import User from "../models/User";
-const NaverStrategy = require("passport-naver").Strategy;
+import User from "../models/schemas/User";
+const KakaoStrategy = require("passport-kakao").Strategy;
 
 type ProfileType = {
     id: string;
     provider: string;
     _json: {
-        id: string;
-        nickname: string;
-        email: string;
-        profile_image: string;
+        properties: {
+            nickname: string;
+            profile_image: string;
+        };
     };
 };
 
-var naverPassportConfig = function (passport: PassportStatic) {
+var kakaoPassportConfig = function (passport: PassportStatic) {
     passport.use(
-        new NaverStrategy(
+        new KakaoStrategy(
             {
-                clientID: process.env.NAVER_CLIENT_ID,
-                clientSecret: process.env.NAVER_CLIENT_SECRET,
-                callbackURL: process.env.NAVER_CALLBACK_URL,
+                clientID: process.env.KAKAO_CLIENT_ID,
+                callbackURL: process.env.KAKAO_CALLBACK_URL,
             },
             async (
                 accessToken: string,
@@ -32,11 +31,13 @@ var naverPassportConfig = function (passport: PassportStatic) {
                     if (userInfo) {
                         return done(null, profile.id);
                     } else {
+                        console.log(profile);
+
                         const newUser = new User({
                             id: profile.id,
-                            email: profile._json.email,
-                            profile_image: profile._json.profile_image,
-                            nickname: profile._json.nickname,
+                            // email: profile._json.email,
+                            profile_image: profile._json.properties.profile_image,
+                            nickname: profile._json.properties.nickname,
                             // name: profile._json.name,
                             type: profile.provider,
                         });
@@ -57,4 +58,4 @@ var naverPassportConfig = function (passport: PassportStatic) {
     );
 };
 
-export default naverPassportConfig;
+export default kakaoPassportConfig;

@@ -1,25 +1,25 @@
 import { PassportStatic } from "passport";
-import User from "../models/User";
-import { log } from "console";
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+import User from "../models/schemas/User";
+const NaverStrategy = require("passport-naver").Strategy;
 
 type ProfileType = {
     id: string;
     provider: string;
     _json: {
-        name: string;
+        id: string;
+        nickname: string;
         email: string;
-        picture: string;
+        profile_image: string;
     };
 };
 
-var googlePassportConfig = function (passport: PassportStatic) {
+var naverPassportConfig = function (passport: PassportStatic) {
     passport.use(
-        new GoogleStrategy(
+        new NaverStrategy(
             {
-                clientID: process.env.GOOGLE_CLIENT_ID,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: process.env.GOOGLE_CALLBACK_URL,
+                clientID: process.env.NAVER_CLIENT_ID,
+                clientSecret: process.env.NAVER_CLIENT_SECRET,
+                callbackURL: process.env.NAVER_CALLBACK_URL,
             },
             async (
                 accessToken: string,
@@ -29,18 +29,15 @@ var googlePassportConfig = function (passport: PassportStatic) {
             ) => {
                 try {
                     const userInfo = await User.findOne({ id: profile.id });
-
                     if (userInfo) {
-                        console.log("profileId,", profile.id);
-
                         return done(null, profile.id);
                     } else {
                         const newUser = new User({
                             id: profile.id,
                             email: profile._json.email,
-                            profile_image: profile._json.picture,
-                            nickname: profile._json.name,
-                            name: profile._json.name,
+                            profile_image: profile._json.profile_image,
+                            nickname: profile._json.nickname,
+                            // name: profile._json.name,
                             type: profile.provider,
                         });
                         const res = await newUser.save();
@@ -60,4 +57,4 @@ var googlePassportConfig = function (passport: PassportStatic) {
     );
 };
 
-export default googlePassportConfig;
+export default naverPassportConfig;
