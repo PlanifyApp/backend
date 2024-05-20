@@ -84,7 +84,6 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(express.static(path.join(__dirname, "public")));
 app.use(
     session({
         secret: process.env.JWT_SECRET || "",
@@ -102,7 +101,6 @@ app.use(
     })
 );
 app.use(csrf());
-// app.use(passport.authenticate("session"));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors({ credentials: true }));
@@ -149,6 +147,7 @@ app.use(cors({ credentials: true }));
 // });
 
 passport.use(googlePassportConfig);
+passport.use(naverPassportConfig);
 
 passport.serializeUser(function (id: any, cb) {
     User.findById(id)
