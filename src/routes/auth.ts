@@ -14,9 +14,9 @@ authRouter.get(
         failureRedirect: "/login",
     }),
     (req: Request, res: Response) => {
-        // const token = jwt.sign({ user: req.user }, process.env.JWT_SECRET || "", { expiresIn: "1h" });
-        const token = jwt.sign({ user: req.user }, process.env.JWT_SECRET || "");
-        res.cookie("token", token);
+        const token = jwt.sign({ user: req.user }, process.env.JWT_SECRET || "", { expiresIn: "1h" });
+        // const token = jwt.sign({ user: req.user }, process.env.JWT_SECRET || "");
+        res.cookie("token", token, { maxAge: 60 * 60 * 1000 }); // 1시간 (60분 * 60초 * 1000밀리초)
         res.redirect("http://localhost:3000");
     }
 );
