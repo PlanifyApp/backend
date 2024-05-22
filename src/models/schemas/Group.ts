@@ -1,19 +1,16 @@
 import mongoose, { Schema } from "mongoose";
+import autoIncrement from "mongoose-sequence";
+
+const AutoIncrement = autoIncrement(mongoose.connection);
 
 export interface Group extends Document {
-    id: number;
     name: String;
     color: String;
     is_show: String;
 }
 
 const GroupSchema: Schema = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-    },
-    name: {
+    title: {
         type: String,
         required: true,
     },
@@ -32,5 +29,6 @@ const GroupSchema: Schema = new Schema({
     },
 });
 
-const Group = mongoose.model<Group>("User", GroupSchema);
+GroupSchema.plugin(AutoIncrement, { inc_field: "id" });
+const Group = mongoose.model<Group>("Group", GroupSchema);
 export default Group;
