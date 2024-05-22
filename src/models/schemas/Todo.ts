@@ -21,6 +21,10 @@ const TodoSchema: Schema = new Schema({
         required: false,
         default: "Y",
     },
+    user_id: {
+        type: String,
+        required: true,
+    },
 });
 
 const Todo = mongoose.model<Todo>("Todo", TodoSchema);
