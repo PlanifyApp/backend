@@ -1,7 +1,6 @@
 import mongoose, { Schema } from "mongoose";
-import autoIncrement from "mongoose-sequence";
-
-const AutoIncrement = autoIncrement(mongoose.connection);
+const AutoIncrementFactory = require("mongoose-sequence")(mongoose);
+const AutoIncrement = AutoIncrementFactory(mongoose.connection);
 
 export interface Group extends Document {
     name: String;
