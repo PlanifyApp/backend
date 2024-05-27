@@ -7,13 +7,20 @@ groupRouter.get("/list", async (req: any, res: any) => {
     const user = req.user?.user;
 
     if (user) {
-        const group = await Group.find({ user_id: user.id, is_show: true });
+        const group = await Group.find({ user_id: user.id, is_show: "Y" });
+        const newData: { title: string; color: string }[] = [];
 
-        console.log(group);
+        group.forEach((element) => {
+            newData.push({
+                title: element.title,
+                color: element.color,
+            });
+        });
+
         return res.status(200).json({
             data: {
                 status: 200,
-                group,
+                newData,
             },
         });
     } else {
