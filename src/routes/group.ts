@@ -44,22 +44,16 @@ groupRouter.post("/store", async (req: any, res: any) => {
             user_id: user.id,
         });
 
-        const res = await newGroup.save();
-        console.log(res);
-        // const group = await Group.find({ user_id: user.id, is_show: true });
-        // console.log(group);
-        // return res.status(200).json({
-        //     data: {
-        //         status: 200,
-        //         user: {
-        //             id: user.id,
-        //             email: user.email,
-        //             image: user.profile_image,
-        //             nickname: user.nickname,
-        //             name: user.name,
-        //         },
-        //     },
-        // });
+        const saveData = await newGroup.save();
+
+        if (saveData) {
+            return res.status(200).json({
+                data: {
+                    status: 200,
+                    newGroup,
+                },
+            });
+        }
     } else {
         return res.status(200).json({
             data: {
