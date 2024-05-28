@@ -1,19 +1,18 @@
 import mongoose, { Schema } from "mongoose";
 
 interface Todo extends Document {
-    id: number;
     title: string;
     is_show: string;
+    user_id: string;
 }
 
 const TodoSchema: Schema = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-    },
     title: {
         type: String,
+        required: true,
+    },
+    date: {
+        type: Date,
         required: true,
     },
     is_show: {

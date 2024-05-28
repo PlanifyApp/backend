@@ -5,11 +5,12 @@ export const todoRouter = express.Router();
 
 todoRouter.get("/list", async (req: any, res: any) => {
     const user = req.user?.user;
+    const { date } = req.body;
 
     if (user) {
-        const res = await Todo.find({ id: user.id, is_show: true });
-        console.log(res);
-        // if(res.length > 0)
+        const todo = await Todo.find({ user_id: user.id, date: date, is_show: "Y" });
+        console.log(todo);
+
         // return res.status(200).json({
         //     data: {
         //         status: 200,
@@ -34,34 +35,25 @@ todoRouter.get("/list", async (req: any, res: any) => {
 
 todoRouter.post("/store", async (req: any, res: any) => {
     const user = req.user?.user;
+    const { title, date } = req.body;
 
     if (user) {
-        console.log(req);
-        // const newTodo = new Todo({
-        //     title: req.body.title,
-        // });
+        const newTodo = new Todo({
+            title: title,
+            date: date,
+            user_id: user.id,
+        });
 
-        // const res = await newTodo.save();
-        // console.log(res);
-
-        // return res.status(200).json({
-        //     data: {
-        //         status: 200,
-        //         id:
-        // })
-        // if(res.length > 0)
-        // return res.status(200).json({
-        //     data: {
-        //         status: 200,
-        //         user: {
-        //             id: user.id,
-        //             email: user.email,
-        //             image: user.profile_image,
-        //             nickname: user.nickname,
-        //             name: user.name,
-        //         },
-        //     },
-        // });
+        const saveData = await newTodo.save();
+        console.log(saveData);
+        if (saveData) {
+            return res.status(200).json({
+                data: {
+                    status: 200,
+                    newTodo,
+                },
+            });
+        }
     } else {
         return res.status(200).json({
             data: {
