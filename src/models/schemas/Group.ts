@@ -1,19 +1,14 @@
 import mongoose, { Schema } from "mongoose";
 
-export interface Group extends Document {
-    id: number;
-    name: String;
-    color: String;
-    is_show: String;
+interface Group extends Document {
+    title: string;
+    name: string;
+    color: string;
+    is_show: string;
 }
 
 const GroupSchema: Schema = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-    },
-    name: {
+    title: {
         type: String,
         required: true,
     },
@@ -26,7 +21,11 @@ const GroupSchema: Schema = new Schema({
         required: false,
         default: "Y",
     },
+    user_id: {
+        type: String,
+        required: true,
+    },
 });
 
-const Group = mongoose.model<Group>("User", GroupSchema);
+const Group = mongoose.model<Group>("Group", GroupSchema);
 export default Group;

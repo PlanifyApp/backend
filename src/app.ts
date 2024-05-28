@@ -4,7 +4,6 @@ dotenv.config();
 import express from "express";
 import logger from "morgan";
 import cookieParser from "cookie-parser";
-import path from "path";
 import session from "express-session";
 import cors from "cors";
 import passport from "passport";
@@ -15,8 +14,6 @@ import indexRouter from "./routes/index";
 import { connectToMongoDB } from "./models";
 import User from "./models/schemas/User";
 import http from "http";
-// import debug from "debug";
-import MongoStore from "connect-mongo";
 import csrf from "csurf";
 
 // db connection
@@ -41,58 +38,22 @@ declare module "express-session" {
 
 const port = process.env.PORT;
 const app = express();
+const server = http.createServer(app);
+const csrfProtection = csrf({ cookie: true });
 
 app.set("port", port);
-
-const server = http.createServer(app);
-var debug = require("debug")("backend:server");
-
-// connection error
-const onError = (error: any) => {
-    if (error.syscall !== "listen") {
-        throw error;
-    }
-
-    var bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
-
-    // handle specific listen errors with friendly messages
-    switch (error.code) {
-        case "EACCES":
-            console.error(bind + " requires elevated privileges");
-            process.exit(1);
-            break;
-        case "EADDRINUSE":
-            console.error(bind + " is already in use");
-            process.exit(1);
-            break;
-        default:
-            throw error;
-    }
-};
-
-function onListening() {
-    const addr = server.address();
-    const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr?.port;
-    debug("Listening on " + bind);
-}
-
-server.listen(port);
-server.on("error", onError);
-server.on("listening", onListening);
 
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+
 app.use(
     session({
         secret: process.env.JWT_SECRET || "",
-        resave: true, // don't save session if unmodified
-        saveUninitialized: false, // don't create session until something stored
-        // store: MongoStore.create({
-        //     mongoUrl: process.env.MONGO_URI,
-        //     ttl: 2 * 60,
-        // }),
+        resave: true,
+        saveUninitialized: false,
         cookie: {
             maxAge: 2 * 60,
             secure: false, // HTTPS를 사용할 경우 true로 설정
@@ -100,51 +61,18 @@ app.use(
         },
     })
 );
-app.use(csrf());
+
+//=========== csrf 설정 ===========//
+app.use(csrfProtection);
+app.use((req, res, next) => {
+    console.log(req.csrfToken());
+    res.cookie("XSRF-TOKEN", req.csrfToken(), { httpOnly: false, sameSite: "lax" });
+    next();
+});
+
+//=========== passport 설정 ===========//
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(cors({ credentials: true }));
-
-// var sess = {
-//     secret: "keyboard cat",
-//     cookie: { secure: false },
-// };
-// console.log(app.get("env"));
-
-// if (app.get("env") === "production") {
-//     app.set("trust proxy", 1); // trust first proxy
-//     sess.cookie.secure = true; // serve secure cookies
-// }
-
-// app.use(session(sess));
-
-// app.use(
-//     session({
-//         secret: process.env.SESSION_SECRET_KEY || "default-secret-key",
-//         resave: false,
-//         saveUninitialized: false,
-//         cookie: {
-//             secure: true,
-//         },
-//     })
-// );
-
-// app.use(passport.initialize());
-// app.use(passport.session());
-
-// googlePassportConfig(passport);
-// naverPassportConfig(passport);
-// kakaoPassportConfig(passport);
-
-// passport.serializeUser(function (user, done) {
-//     done(null, user);
-// });
-
-// passport.deserializeUser(function (id: string, done) {
-//     User.findById(id)
-//         .then((user) => done(null, user))
-//         .catch((err) => done(err));
-// });
 
 passport.use(googlePassportConfig);
 passport.use(naverPassportConfig);
@@ -160,4 +88,36 @@ passport.deserializeUser(function (user: any, cb) {
     cb(null, user);
 });
 
+//=========== 라우터 설정 ===========//
 app.use("/api", indexRouter);
+
+//=========== 서버 시작 ===========//
+server.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
+//=========== 서버 에러 핸들링 ===========//
+server.on("error", (error: any) => {
+    if (error.syscall !== "listen") {
+        throw error;
+    }
+    const bind = typeof port === "string" ? "Pipe " + port : "Port " + port;
+    switch (error.code) {
+        case "EACCES":
+            console.error(bind + " requires elevated privileges");
+            process.exit(1);
+            break;
+        case "EADDRINUSE":
+            console.error(bind + " is already in use");
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+});
+
+server.on("listening", () => {
+    const addr = server.address();
+    const bind = typeof addr === "string" ? "pipe " + addr : "port " + addr?.port;
+    console.log("Listening on " + bind);
+});

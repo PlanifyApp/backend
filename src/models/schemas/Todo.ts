@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-export interface Todo extends Document {
+interface Todo extends Document {
     id: number;
     title: string;
     is_show: string;
