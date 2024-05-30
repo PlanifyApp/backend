@@ -17,6 +17,11 @@ const TodoSchema: Schema = new Schema({
         type: String,
         required: true,
     },
+    date: {
+        type: Date,
+        required: true,
+        default: Date.now,
+    },
     isDone: {
         type: String,
         required: false,
