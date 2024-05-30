@@ -58,9 +58,8 @@ app.use(
         resave: true,
         saveUninitialized: false,
         cookie: {
-            maxAge: 2 * 60,
+            httpOnly: true,
             secure: false, // HTTPS를 사용할 경우 true로 설정
-            sameSite: "lax", // 또는 'none'으로 설정
         },
     })
 );
@@ -68,7 +67,6 @@ app.use(
 //=========== csrf 설정 ===========//
 app.use(csrfProtection);
 app.use((req, res, next) => {
-    console.log(req.csrfToken());
     res.cookie("XSRF-TOKEN", req.csrfToken(), { httpOnly: false, sameSite: "lax" });
     next();
 });
@@ -81,14 +79,14 @@ passport.use(googlePassportConfig);
 passport.use(naverPassportConfig);
 passport.use(kakaoPassportConfig);
 
-passport.serializeUser(function (id: any, cb) {
+passport.serializeUser((user: any, cb) => {
+    cb(null, user.id);
+});
+
+passport.deserializeUser((id: string, cb) => {
     User.findById(id)
         .then((user) => cb(null, user)) // 세션에서 식별자를 기반으로 사용자를 찾음
         .catch((err) => cb(err));
-});
-
-passport.deserializeUser(function (user: any, cb) {
-    cb(null, user);
 });
 
 //=========== 라우터 설정 ===========//
