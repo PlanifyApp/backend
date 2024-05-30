@@ -1,6 +1,6 @@
 import express from "express";
 import Todo from "../models/schemas/Todo";
-import { ObjectId } from "mongoose";
+import { Types } from "mongoose";
 
 export const todoRouter = express.Router();
 
@@ -10,14 +10,14 @@ todoRouter.get("/list", async (req: any, res: any) => {
 
     if (user) {
         const todo = await Todo.find({
-            user_id: user.id,
+            userId: user._id,
             date: {
                 $gte: new Date(date + "T00:00:00Z"),
                 $lte: new Date(date + "T23:59:59Z"),
             },
-            is_show: "Y",
+            isShow: "Y",
         });
-        const newData: { id: ObjectId; title: string; date: string; is_done: string }[] = [];
+        const newData: { id: Types.ObjectId; title: string; date: string; isDone: string }[] = [];
 
         todo.forEach((element) => {
             const newDate = new Date(element.date);
@@ -29,7 +29,7 @@ todoRouter.get("/list", async (req: any, res: any) => {
                 id: element._id,
                 title: element.title,
                 date: `${year}-${month}-${day}`,
-                is_done: element.is_done,
+                isDone: element.isDone,
             });
         });
 
@@ -57,7 +57,7 @@ todoRouter.post("/store", async (req: any, res: any) => {
         const newTodo = new Todo({
             title: title,
             date: new Date(date),
-            user_id: user.id,
+            userId: user._id,
         });
 
         const saveData = await newTodo.save();
@@ -69,6 +69,41 @@ todoRouter.post("/store", async (req: any, res: any) => {
                     newTodo,
                 },
             });
+        }
+    } else {
+        return res.status(200).json({
+            data: {
+                status: 401,
+                message: "로그인이 필요합니다.",
+            },
+        });
+    }
+});
+
+todoRouter.put("/check/:id", async (req: any, res: any) => {
+    const user = req.user?.user;
+    const { id } = req.params;
+
+    if (user) {
+        const obId = new Types.ObjectId(id);
+        const todoData = await Todo.findOne({ userId: user._id, _id: obId });
+
+        if (todoData) {
+            const newIsDone = todoData.isDone === "Y" ? "N" : "Y";
+            const updateData = await Todo.findOneAndUpdate(
+                { userId: user._id, _id: obId },
+                { idDone: newIsDone, modifiedAt: new Date() },
+                { new: true }
+            );
+
+            if (updateData) {
+                return res.status(200).json({
+                    data: {
+                        status: 200,
+                        updateData,
+                    },
+                });
+            }
         }
     } else {
         return res.status(200).json({
