@@ -1,20 +1,21 @@
 import mongoose, { Schema } from "mongoose";
+const {
+    Types: { ObjectId },
+} = Schema;
 
 export interface Schedule extends Document {
     id: number;
     title: string;
     memo: string;
-    group_id: number;
-    start_date: Date;
-    end_date: Date;
+    groupId: number;
+    startDate: Date;
+    endDate: Date;
+    userId: typeof ObjectId;
+    createAt: Date;
+    modifiedAt: Date;
 }
 
 const ScheduleSchema: Schema = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-    },
     title: {
         type: String,
         required: true,
@@ -23,17 +24,30 @@ const ScheduleSchema: Schema = new Schema({
         type: String,
         required: false,
     },
-    group_id: {
+    groupId: {
         type: Number,
         required: false,
     },
-    start_date: {
+    startDate: {
         type: Date,
         required: true,
     },
-    end_date: {
+    endDate: {
         type: Date,
         required: true,
+    },
+    userId: {
+        type: ObjectId,
+        required: true,
+        ref: "User",
+    },
+    createAt: {
+        type: Date,
+        default: Date.now,
+    },
+    modifiedAt: {
+        type: Date,
+        default: Date.now,
     },
 });
 

@@ -1,10 +1,15 @@
 import mongoose, { Schema } from "mongoose";
+const {
+    Types: { ObjectId },
+} = Schema;
 
 interface Group extends Document {
     title: string;
-    name: string;
     color: string;
-    is_show: string;
+    isShow: string;
+    userId: typeof ObjectId;
+    createAt: Date;
+    modifiedAt: Date;
 }
 
 const GroupSchema: Schema = new Schema({
@@ -16,14 +21,23 @@ const GroupSchema: Schema = new Schema({
         type: String,
         required: true,
     },
-    is_show: {
+    isShow: {
         type: String,
         required: false,
         default: "Y",
     },
-    user_id: {
-        type: String,
+    userId: {
+        type: ObjectId,
         required: true,
+        ref: "User",
+    },
+    createAt: {
+        type: Date,
+        default: Date.now,
+    },
+    modifiedAt: {
+        type: Date,
+        default: Date.now,
     },
 });
 

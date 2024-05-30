@@ -1,9 +1,15 @@
 import mongoose, { Schema } from "mongoose";
+const {
+    Types: { ObjectId },
+} = Schema;
 
 interface Todo extends Document {
     title: string;
-    is_show: string;
-    user_id: string;
+    isDone: string;
+    isShow: string;
+    userId: typeof ObjectId;
+    createAt: Date;
+    modifiedAt: Date;
 }
 
 const TodoSchema: Schema = new Schema({
@@ -11,23 +17,28 @@ const TodoSchema: Schema = new Schema({
         type: String,
         required: true,
     },
-    date: {
-        type: Date,
-        required: true,
-    },
-    is_done: {
-        type: String,
-        required: false,
-        default: "N",
-    },
-    is_show: {
+    isDone: {
         type: String,
         required: false,
         default: "Y",
     },
-    user_id: {
+    isShow: {
         type: String,
+        required: false,
+        default: "Y",
+    },
+    userId: {
+        type: ObjectId,
         required: true,
+        ref: "User",
+    },
+    createAt: {
+        type: Date,
+        default: Date.now,
+    },
+    modifiedAt: {
+        type: Date,
+        default: Date.now,
     },
 });
 

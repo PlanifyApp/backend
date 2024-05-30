@@ -7,7 +7,7 @@ groupRouter.get("/list", async (req: any, res: any) => {
     const user = req.user?.user;
 
     if (user) {
-        const group = await Group.find({ user_id: user.id, is_show: "Y" });
+        const group = await Group.find({ userId: user._id, isShow: "Y" });
         const newData: { title: string; color: string }[] = [];
 
         group.forEach((element) => {
@@ -41,7 +41,7 @@ groupRouter.post("/store", async (req: any, res: any) => {
         const newGroup = new Group({
             title: title,
             color: color,
-            user_id: user.id,
+            userId: user._id,
         });
 
         const saveData = await newGroup.save();
