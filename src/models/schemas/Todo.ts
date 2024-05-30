@@ -7,6 +7,7 @@ interface Todo extends Document {
     title: string;
     isDone: string;
     isShow: string;
+    date: Date;
     userId: typeof ObjectId;
     createAt: Date;
     modifiedAt: Date;
