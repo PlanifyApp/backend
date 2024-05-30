@@ -3,10 +3,12 @@ import mongoose, { Schema } from "mongoose";
 interface User extends Document {
     id: string;
     email: string;
-    profile_image: string;
+    profileImage: string;
     nickname: string;
     name: string;
     type: string;
+    createAt: Date;
+    modifiedAt: Date;
 }
 
 const UserSchema: Schema = new Schema({
@@ -19,7 +21,7 @@ const UserSchema: Schema = new Schema({
         type: String,
         required: true,
     },
-    profile_image: {
+    profileImage: {
         type: String,
         required: false,
     },
@@ -34,6 +36,14 @@ const UserSchema: Schema = new Schema({
     type: {
         type: String,
         required: true,
+    },
+    createAt: {
+        type: Date,
+        default: Date.now,
+    },
+    modifiedAt: {
+        type: Date,
+        default: Date.now,
     },
 });
 
