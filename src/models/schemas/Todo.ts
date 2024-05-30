@@ -14,11 +14,6 @@ interface Todo extends Document {
 }
 
 const TodoSchema: Schema = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true,
-    },
     title: {
         type: String,
         required: true,
