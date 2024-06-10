@@ -77,11 +77,11 @@ passport.use(naverPassportConfig);
 passport.use(kakaoPassportConfig);
 
 passport.serializeUser((user: any, cb) => {
-    cb(null, user.id);
+    cb(null, user._id);
 });
 
 passport.deserializeUser((id: string, cb) => {
-    User.findById(id)
+    User.findOne({ _id: id })
         .then((user) => cb(null, user)) // 세션에서 식별자를 기반으로 사용자를 찾음
         .catch((err) => cb(err));
 });

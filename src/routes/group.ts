@@ -1,5 +1,6 @@
 import express, { Response } from "express";
 import Group from "../models/schemas/Group";
+import { ObjectId } from "mongoose";
 
 export const groupRouter = express.Router();
 
@@ -7,7 +8,7 @@ groupRouter.get("/list", async (req: any, res: any) => {
     const user = req.user?.user;
 
     if (user) {
-        const group = await Group.find({ userId: user._id, isShow: "Y" });
+        const group = await Group.find({ userId: user._id as ObjectId, isShow: "Y" });
         const newData: { title: string; color: string }[] = [];
 
         group.forEach((element) => {
@@ -41,7 +42,7 @@ groupRouter.post("/store", async (req: any, res: any) => {
         const newGroup = new Group({
             title: title,
             color: color,
-            userId: user._id,
+            userId: user._id as ObjectId,
         });
 
         const saveData = await newGroup.save();
