@@ -26,7 +26,7 @@ const TodoSchema: Schema = new Schema({
     isDone: {
         type: String,
         required: false,
-        default: "Y",
+        default: "N",
     },
     isShow: {
         type: String,
