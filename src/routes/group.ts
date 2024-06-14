@@ -9,10 +9,11 @@ groupRouter.get("/list", async (req: any, res: any) => {
 
     if (user) {
         const group = await Group.find({ userId: user._id as ObjectId, isShow: "Y" });
-        const newData: { title: string; color: string }[] = [];
+        const newData: { id: string; title: string; color: string }[] = [];
 
         group.forEach((element) => {
             newData.push({
+                id: element._id.toString(),
                 title: element.title,
                 color: element.color,
             });

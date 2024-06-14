@@ -25,8 +25,9 @@ const ScheduleSchema: Schema = new Schema({
         required: false,
     },
     groupId: {
-        type: Number,
+        type: ObjectId,
         required: false,
+        ref: "Group",
     },
     startDate: {
         type: Date,
@@ -40,6 +41,11 @@ const ScheduleSchema: Schema = new Schema({
         type: ObjectId,
         required: true,
         ref: "User",
+    },
+    isShow: {
+        type: String,
+        required: false,
+        default: "Y",
     },
     createAt: {
         type: Date,
