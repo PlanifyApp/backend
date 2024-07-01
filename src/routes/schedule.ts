@@ -99,7 +99,7 @@ scheduleRouter.get("/month", async (req: any, res: any) => {
 
         monthlySchedule.forEach((element) => {
             const startDateParse = element.startDate.toISOString().replace("T", " ").replace(/\..+/, "");
-            const startDateDay = startDateParse.split(/(\s+)/)[0].split("-")[2];
+            const startDateDay = parseInt(startDateParse.split(/(\s+)/)[0].split("-")[2], 10);
             const endDateParse = element.endDate.toISOString().replace("T", " ").replace(/\..+/, "");
 
             if (!dataList[startDateDay]) {
