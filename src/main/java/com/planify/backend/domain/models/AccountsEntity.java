@@ -13,12 +13,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AccountsEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
-    private Long wallet_id;
+    @Column(name = "wallet_id", nullable = false,  unique = true)
+    private Long walletId;
+
     private String name;
     private Long quota;
     private Long budgeted;
-    private Long current_value;
-    private Long user_id;
+
+    @Column(name = "current_value")
+    private Long currentValue;
+
+    @Column(name = "user_id")
+    private Long userId;
 }
