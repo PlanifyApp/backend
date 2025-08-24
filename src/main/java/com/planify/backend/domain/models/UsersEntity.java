@@ -2,6 +2,7 @@ package com.planify.backend.domain.models;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
@@ -9,18 +10,28 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "users")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsersEntity {
+
+    public enum GenderEnum {
+        male, female, other
+    }
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    public String profilePicture;
-    public String firstname;
-    public String lastname;
-    public String gender;
-    public String username;
-    public String role;
-    public String address;
-    public String email;
+
+    private String profilePicture;
+    private String firstname;
+    private String lastname;
+    private String username;
+
+    @Enumerated(EnumType.STRING)
+    private GenderEnum gender;
+
+    private String role;
+    private String address;
+    private String email;
 }
