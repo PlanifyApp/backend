@@ -1,5 +1,6 @@
 package com.planify.backend.presentation.controllers;
 
+import com.planify.backend.application.dtos.RegisterUserDTO;
 import com.planify.backend.application.use_cases.UsersService;
 import com.planify.backend.domain.models.UsersEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +14,11 @@ public class UsersController {
         this.usersService = usersService;
     }
 
-//    @PostMapping
-//    public UsersEntity createUser(@RequestBody UsersEntity user){
-//        System.out.println("Creating user: " + user);
-//        return usersService.createUser(user);
-//    }
+    @PostMapping
+    public UsersEntity createUser(@RequestBody RegisterUserDTO user){
+        System.out.println("Creating user: " + user);
+        return usersService.createUser(user);
+    }
 
     @GetMapping
     public Iterable<UsersEntity> getAllUsers() {
