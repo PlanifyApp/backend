@@ -10,7 +10,7 @@ import java.io.IOException;
 
 @Configuration
 public class FirebaseConfig {
-
+    /*
     @PostConstruct
     public void initFirebase() throws IOException {
         FileInputStream serviceAccount = new FileInputStream("./serviceAccountKey.json");
@@ -21,5 +21,5 @@ public class FirebaseConfig {
 
         FirebaseApp.initializeApp(options);
     }
-
+    */
 }
