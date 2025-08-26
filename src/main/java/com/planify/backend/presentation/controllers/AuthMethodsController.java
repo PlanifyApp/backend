@@ -1,5 +1,7 @@
 package com.planify.backend.presentation.controllers;
 
+import com.planify.backend.application.dtos.AuthMethodDTO;
+import com.planify.backend.application.dtos.CreateAuthMethodDTO;
 import com.planify.backend.application.use_cases.AuthMethodsService;
 import com.planify.backend.domain.models.AuthMethodsEntity;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +20,16 @@ public class AuthMethodsController {
     }
 
     @PostMapping
-    public ResponseEntity<AuthMethodsEntity> create(@RequestBody AuthMethodsEntity entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<AuthMethodDTO> create(@RequestBody CreateAuthMethodDTO dto) {
+        AuthMethodsEntity entity = service.save(service.toEntity(dto));
+        return ResponseEntity.ok(service.toDTO(entity));
     }
 
     @GetMapping("/{userId}/{provider}")
-    public ResponseEntity<AuthMethodsEntity> getByUserAndProvider(@PathVariable Integer userId, @PathVariable String provider) {
-        Optional<AuthMethodsEntity> authMethod = service.findByUserAndProvider(userId, provider);
-        return authMethod.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AuthMethodDTO> getByUserAndProvider(@PathVariable Integer userId, @PathVariable String provider) {
+        return service.findByUserAndProvider(userId, provider)
+                .map(service::toDTO)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
