@@ -3,7 +3,6 @@ package com.planify.backend.presentation.controllers;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
-import com.planify.backend.application.use_cases.ValidateFirebaseTokenUseCase;
 import com.planify.backend.domain.models.FirebaseUser;
 import com.planify.backend.infrastructure.security.firebase.FirebaseTokenValidator;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,14 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.AssertionsKt.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AuthControllerTest {
+class FirebaseServiceTest {
 
     @Mock
     private FirebaseAuth firebaseAuth;
