@@ -60,7 +60,20 @@ public class FixedExpenseService {
         e.setBudget(dto.getBudget());
         e.setCurrentValue(dto.getCurrentValue());
         if (dto.getType() != null) {
-            e.setType(FixedExpenseEntity.GoalType.valueOf(dto.getType().toLowerCase()));
+            try {
+                // Normaliza: quita espacios, fuerza a minúsculas y compara con el enum
+                //String normalized = dto.getType().trim().toLowerCase();
+                //e.setType(GoalType.valueOf(normalized));
+                String normalized = dto.getType().trim().toLowerCase();
+                for (GoalType gt : GoalType.values()) {
+                    if (gt.name().equalsIgnoreCase(normalized)) {
+                        e.setType(gt);
+                        break;
+                    }
+                }
+            } catch (IllegalArgumentException ex) {
+                throw new RuntimeException("Tipo inválido para FixedExpense: " + dto.getType());
+            }
         }
         e.setCreatedAt(LocalDateTime.now());
         return e;
