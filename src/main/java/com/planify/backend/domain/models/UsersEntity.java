@@ -1,18 +1,18 @@
 package com.planify.backend.domain.models;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
 
-@Entity
-@Table(name = "users")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table("users") // Nombre de la tabla en la BD
 public class UsersEntity {
 
     public enum GenderEnum {
@@ -20,18 +20,30 @@ public class UsersEntity {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; // R2DBC asigna automáticamente si la columna es SERIAL/IDENTITY
 
+    @Column("profile_picture")
     private String profilePicture;
+
+    @Column("firstname")
     private String firstname;
+
+    @Column("lastname")
     private String lastname;
+
+    @Column("username")
     private String username;
 
-    @Enumerated(EnumType.STRING)
+    // En R2DBC no hay @Enumerated, se guarda como texto
+    @Column("gender")
     private GenderEnum gender;
 
+    @Column("role")
     private String role;
+
+    @Column("address")
     private String address;
+
+    @Column("email")
     private String email;
 }

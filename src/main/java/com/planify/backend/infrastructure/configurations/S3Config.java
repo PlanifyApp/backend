@@ -1,18 +1,17 @@
 package com.planify.backend.infrastructure.configurations;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 
 @Configuration
 public class S3Config {
 
     @Bean
-    public AmazonS3 amazonS3() {
-
+    public S3AsyncClient s3AsyncClient() {
         String awsAccessKeyId = System.getenv("AWS_ACCESS_KEY_ID");
         String awsSecretKey = System.getenv("AWS_SECRET_ACCESS_KEY");
         String awsRegion = System.getenv("AWS_REGION");
@@ -21,11 +20,11 @@ public class S3Config {
             throw new IllegalStateException("Variables de entorno AWS faltantes.");
         }
 
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretKey);
-
-        return AmazonS3ClientBuilder.standard()
-                .withRegion(awsRegion)
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
+        return S3AsyncClient.builder()
+                .region(Region.of(awsRegion))
+                .credentialsProvider(
+                        StaticCredentialsProvider.create(AwsBasicCredentials.create(awsAccessKeyId, awsSecretKey))
+                )
                 .build();
     }
 }
