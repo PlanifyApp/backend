@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
     private final ValidateFirebaseTokenUseCase validateToken;
 
     public AuthController(ValidateFirebaseTokenUseCase validateToken) {
@@ -19,10 +19,11 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<FirebaseUser> getAuthenticateUser(@RequestHeader("Authorization") String authHeader) {
+    public Mono<ResponseEntity<FirebaseUser>> getAuthenticateUser(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
-        FirebaseUser user = validateToken.execute(token);
-        return ResponseEntity.ok(user);
+        return validateToken.execute(token)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.status(401).build());
     }
-
 }
+

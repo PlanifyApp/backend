@@ -4,20 +4,26 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
+import org.springframework.data.relational.core.mapping.Column;
 
-@Entity
-@Table(name = "auth_methods")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table("auth_methods")
 public class AuthMethodEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    public Long user_id;
-    public String provider;
-    public String password;
-    public String provider_user_id;
+
+    @Column("user_id")
+    private Long userId;
+
+    private String provider;
+    private String password;
+
+    @Column("provider_user_id")
+    private String providerUserId;
 }
