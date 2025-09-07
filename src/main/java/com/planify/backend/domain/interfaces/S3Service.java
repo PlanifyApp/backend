@@ -1,41 +1,58 @@
 package com.planify.backend.domain.interfaces;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
+import software.amazon.awssdk.core.async.AsyncRequestBody;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.util.UUID;
 
 @Service
 public class S3Service {
 
-    private final AmazonS3 amazonS3;
+    private final S3AsyncClient s3AsyncClient;
     private final String bucketName;
 
-
-    public S3Service(AmazonS3 amazonS3) {
-        this.amazonS3 = amazonS3;
+    public S3Service(S3AsyncClient s3AsyncClient) {
+        this.s3AsyncClient = s3AsyncClient;
         this.bucketName = System.getenv("AWS_S3_BUCKET");
     }
 
-    public String uploadFile(MultipartFile file) throws IOException {
-        String extension = getExtension(file.getOriginalFilename());
+    public Mono<String> uploadFile(FilePart filePart) {
+        String extension = getExtension(filePart.filename());
         String uuidFileName = UUID.randomUUID().toString() + "." + extension;
 
-        ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentLength(file.getSize());
-        metadata.setContentType(file.getContentType());
+        PutObjectRequest request = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(uuidFileName)
+                .contentType(filePart.headers().getContentType() != null
+                        ? filePart.headers().getContentType().toString()
+                        : "application/octet-stream")
+                .build();
 
-        amazonS3.putObject(new PutObjectRequest(bucketName, uuidFileName, file.getInputStream(), metadata));
-
-        return "https://" + bucketName + ".s3.amazonaws.com/" + uuidFileName;
+        // Convertir el contenido del FilePart en un byte[]
+        return DataBufferUtils.join(filePart.content())
+                .map(dataBuffer -> {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                    dataBuffer.read(bytes);
+                    DataBufferUtils.release(dataBuffer); // liberar memoria
+                    baos.writeBytes(bytes);
+                    return baos.toByteArray();
+                })
+                .flatMap(bytes ->
+                        Mono.fromFuture(
+                                s3AsyncClient.putObject(request, AsyncRequestBody.fromBytes(bytes))
+                        ).thenReturn("https://" + bucketName + ".s3.amazonaws.com/" + uuidFileName)
+                );
     }
 
     private String getExtension(String fileName) {
-        return fileName.substring(fileName.lastIndexOf('.') + 1);
+        int dotIndex = fileName.lastIndexOf('.');
+        return (dotIndex != -1) ? fileName.substring(dotIndex + 1) : "";
     }
 }
