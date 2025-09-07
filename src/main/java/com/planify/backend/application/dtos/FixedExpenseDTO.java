@@ -13,6 +13,7 @@ public class FixedExpenseDTO {
     private LocalDateTime dateTime;
     private Integer budget;
     private Integer currentValue;
+    private String type; // nuevo campo
     private LocalDateTime createdAt;
     
     // getters/setters, constructor vacío con lombok 

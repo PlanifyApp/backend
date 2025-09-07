@@ -4,24 +4,21 @@ import com.planify.backend.application.dtos.AuthMethodDTO;
 import com.planify.backend.application.dtos.CreateAuthMethodDTO;
 import com.planify.backend.domain.models.AuthMethodsEntity;
 import com.planify.backend.infrastructure.repositories.AuthMethodsRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @Service
+@RequiredArgsConstructor
 public class AuthMethodsService {
 
     private final AuthMethodsRepository repository;
 
-    public AuthMethodsService(AuthMethodsRepository repository) {
-        this.repository = repository;
-    }
-
-    public AuthMethodsEntity save(AuthMethodsEntity entity) {
+    public Mono<AuthMethodsEntity> save(AuthMethodsEntity entity) {
         return repository.save(entity);
     }
 
-    public Optional<AuthMethodsEntity> findByUserAndProvider(Integer userId, String provider) {
+    public Mono<AuthMethodsEntity> findByUserAndProvider(Integer userId, String provider) {
         return repository.findByUserIdAndProvider(userId, provider);
     }
 

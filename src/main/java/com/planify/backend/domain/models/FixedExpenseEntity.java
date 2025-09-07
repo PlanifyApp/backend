@@ -17,8 +17,16 @@ public class FixedExpenseEntity {
     private String name;
     private LocalDateTime dateTime;
     private Integer budget;
+    private GoalType type; // 🔴 ahora es un enum, no String, faltaba este campo también
     private Integer currentValue;
     private LocalDateTime createdAt;
+
+    public enum GoalType {
+        ahorro,
+        deuda,
+        inversion,
+        otro
+    }
 
     // getters & setters con lombok
 }

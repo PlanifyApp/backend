@@ -3,6 +3,7 @@ package com.planify.backend.application.use_cases;
 import com.planify.backend.application.dtos.CreateFixedExpenseDTO;
 import com.planify.backend.application.dtos.FixedExpenseDTO;
 import com.planify.backend.domain.models.FixedExpenseEntity;
+import com.planify.backend.domain.models.FixedExpenseEntity.GoalType;
 import com.planify.backend.infrastructure.repositories.FixedExpenseRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -43,6 +44,7 @@ public class FixedExpenseService {
         dto.setDateTime(e.getDateTime());
         dto.setBudget(e.getBudget());
         dto.setCurrentValue(e.getCurrentValue());
+        dto.setType(e.getType() != null ? e.getType().name() : null);
         dto.setCreatedAt(e.getCreatedAt());
         return dto;
     }
@@ -57,6 +59,9 @@ public class FixedExpenseService {
         e.setDateTime(dto.getDateTime());
         e.setBudget(dto.getBudget());
         e.setCurrentValue(dto.getCurrentValue());
+        if (dto.getType() != null) {
+            e.setType(FixedExpenseEntity.GoalType.valueOf(dto.getType().toLowerCase()));
+        }
         e.setCreatedAt(LocalDateTime.now());
         return e;
     }
@@ -72,6 +77,9 @@ public class FixedExpenseService {
         e.setDateTime(dto.getDateTime());
         e.setBudget(dto.getBudget());
         e.setCurrentValue(dto.getCurrentValue());
+        if (dto.getType() != null) {
+            e.setType(FixedExpenseEntity.GoalType.valueOf(dto.getType().toLowerCase()));
+        }
         e.setCreatedAt(dto.getCreatedAt());
         return e;
     }

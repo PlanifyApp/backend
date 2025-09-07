@@ -4,32 +4,34 @@ import com.planify.backend.application.dtos.AuthMethodDTO;
 import com.planify.backend.application.dtos.CreateAuthMethodDTO;
 import com.planify.backend.application.use_cases.AuthMethodsService;
 import com.planify.backend.domain.models.AuthMethodsEntity;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/auth-methods")
+@RequiredArgsConstructor
 public class AuthMethodsController {
 
     private final AuthMethodsService service;
 
-    public AuthMethodsController(AuthMethodsService service) {
-        this.service = service;
-    }
-
     @PostMapping
-    public ResponseEntity<AuthMethodDTO> create(@RequestBody CreateAuthMethodDTO dto) {
-        AuthMethodsEntity entity = service.save(service.toEntity(dto));
-        return ResponseEntity.ok(service.toDTO(entity));
+    public Mono<ResponseEntity<AuthMethodDTO>> create(@RequestBody CreateAuthMethodDTO dto) {
+        AuthMethodsEntity entity = service.toEntity(dto);
+        return service.save(entity)
+                .map(service::toDTO)
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping("/{userId}/{provider}")
-    public ResponseEntity<AuthMethodDTO> getByUserAndProvider(@PathVariable Integer userId, @PathVariable String provider) {
+    public Mono<ResponseEntity<AuthMethodDTO>> getByUserAndProvider(
+            @PathVariable Integer userId,
+            @PathVariable String provider
+    ) {
         return service.findByUserAndProvider(userId, provider)
                 .map(service::toDTO)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

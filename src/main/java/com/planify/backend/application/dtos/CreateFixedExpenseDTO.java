@@ -19,5 +19,6 @@ public class CreateFixedExpenseDTO {
     private LocalDateTime dateTime;
     private Integer budget = 0;
     private Integer currentValue = 0;
+    private String type; // nuevo campo
     // getters/setters
 }
