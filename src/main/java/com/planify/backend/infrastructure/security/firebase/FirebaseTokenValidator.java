@@ -20,23 +20,9 @@ public class FirebaseTokenValidator implements ValidateFirebaseTokenUseCase {
     }
 
     @Override
-    public FirebaseUser execute(String token) throws FirebaseAuthException {
+    public Mono<FirebaseUser> execute(String token) throws FirebaseAuthException {
         FirebaseToken decoded = firebaseAuth.verifyIdToken(token);
         UserRecord user = firebaseAuth.getUser(decoded.getUid());
         return new FirebaseUser(user.getUid(), user.getEmail());
-    }
-
-    public Mono<FirebaseUser> execute(String idToken) {
-        return Mono.fromCallable(() -> {
-                    FirebaseToken token = FirebaseAuth.getInstance().verifyIdToken(idToken);
-                    return new FirebaseUser(
-                            token.getUid(),
-                            token.getEmail(),
-                            token.isEmailVerified()
-                    );
-                })
-                .subscribeOn(Schedulers.boundedElastic()) // evita bloquear el hilo principal
-                .onErrorMap(FirebaseAuthException.class, e ->
-                        new RuntimeException("Token inválido o expirado", e));
     }
 }
