@@ -1,10 +1,14 @@
 package com.planify.backend.infrastructure.repositories;
 
 import com.planify.backend.domain.models.AccountsEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface AccountsRepository extends JpaRepository<AccountsEntity, Long> {
-    boolean existsByWalletId(Long walletId);
+public interface AccountsRepository extends R2dbcRepository<AccountsEntity, Long> {
+
+    // Como en JPA era boolean, en R2DBC debe devolver Mono<Boolean>
+    Mono<Boolean> existsByWalletId(Long walletId);
 }
+
