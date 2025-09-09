@@ -1,5 +1,6 @@
 package com.planify.backend.presentation.controllers;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import com.planify.backend.application.use_cases.ValidateFirebaseTokenUseCase;
 import com.planify.backend.domain.models.FirebaseUser;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public Mono<ResponseEntity<FirebaseUser>> getAuthenticateUser(@RequestHeader("Authorization") String authHeader) {
+    public Mono<ResponseEntity<FirebaseUser>> getAuthenticateUser(@RequestHeader("Authorization") String authHeader) throws FirebaseAuthException {
         String token = authHeader.replace("Bearer ", "");
         return validateToken.execute(token)
                 .map(ResponseEntity::ok)
