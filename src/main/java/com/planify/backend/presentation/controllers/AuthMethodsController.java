@@ -2,7 +2,7 @@ package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.AuthMethodDTO;
 import com.planify.backend.application.dtos.CreateAuthMethodDTO;
-import com.planify.backend.application.use_cases.AuthMethodService;
+import com.planify.backend.application.use_cases.AuthMethodsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class AuthMethodsController {
 
-    private final AuthMethodService service;
+    private final AuthMethodsService service;
 
     @GetMapping
     public Flux<AuthMethodDTO> getAll() {
