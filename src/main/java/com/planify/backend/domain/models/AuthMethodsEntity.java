@@ -1,6 +1,9 @@
 package com.planify.backend.domain.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
@@ -8,7 +11,10 @@ import org.springframework.data.relational.core.mapping.Column;
 import java.time.LocalDateTime;
 
 @Data
-@Table("auth_methods")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table("auth_methods")  // Nombre de la tabla en tu BD
 public class AuthMethodsEntity {
 
     @Id
@@ -17,15 +23,13 @@ public class AuthMethodsEntity {
     @Column("user_id")
     private Integer userId;
 
-    @Column("provider")
     private String provider;
-
-    @Column("password")
-    private String password;
 
     @Column("provider_user_id")
     private String providerUserId;
 
     @Column("created_at")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
+
+    private String password; // si tu tabla lo maneja, útil para "local"
 }
