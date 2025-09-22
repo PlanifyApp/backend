@@ -8,31 +8,28 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("accounts") // equivale a @Entity + @Table en JPA
-public class AccountsEntity {
+@Table("auth_methods")  // Nombre de la tabla en tu BD
+public class AuthMethodsEntity {
 
     @Id
     private Long id;
 
-    @Column("wallet_id")
-    private Long walletId;
-
-    @Column("name")
-    private String name;
-
-    @Column("quota")
-    private Long quota;
-
-    @Column("budgeted")
-    private Long budgeted;
-
-    @Column("current_value")
-    private Long currentValue;
-
     @Column("user_id")
-    private Long userId;
+    private Integer userId;
+
+    private String provider;
+
+    @Column("provider_user_id")
+    private String providerUserId;
+
+    @Column("created_at")
+    private LocalDateTime createdAt;
+
+    private String password; // si tu tabla lo maneja, útil para "local"
 }
