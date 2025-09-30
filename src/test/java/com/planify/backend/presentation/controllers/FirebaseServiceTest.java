@@ -5,6 +5,9 @@ import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
 import com.planify.backend.domain.models.FirebaseUser;
 import com.planify.backend.infrastructure.security.firebase.FirebaseTokenValidator;
+
+import reactor.core.publisher.Mono;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +44,7 @@ class FirebaseServiceTest {
         when(firebaseAuth.verifyIdToken(fakeToken)).thenReturn(mockDecoded);
         when(firebaseAuth.getUser("uid_prueba")).thenReturn(mockUser);
 
-        FirebaseUser result = firebaseTokenValidator.execute(fakeToken);
+        Mono<FirebaseUser> result = firebaseTokenValidator.execute(fakeToken);
 
         assertNotNull(result);
         verify(firebaseAuth).verifyIdToken(fakeToken);
