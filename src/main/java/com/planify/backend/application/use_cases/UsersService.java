@@ -1,9 +1,9 @@
 package com.planify.backend.application.use_cases;
 
 import com.planify.backend.application.dtos.RegisterUserDTO;
-import com.planify.backend.domain.models.AuthMethodEntity;
+import com.planify.backend.domain.models.AuthMethodsEntity;
 import com.planify.backend.domain.models.UsersEntity;
-import com.planify.backend.infrastructure.repositories.AuthMethodRepository;
+import com.planify.backend.infrastructure.repositories.AuthMethodsRepository;
 import com.planify.backend.infrastructure.repositories.UsersRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -13,11 +13,11 @@ import reactor.core.publisher.Mono;
 public class UsersService {
 
     private final UsersRepository usersRepository;
-    private final AuthMethodRepository authMethodRepository;
+    private final AuthMethodsRepository authMethodsRepository;
 
-    public UsersService(UsersRepository usersRepository, AuthMethodRepository authMethodRepository) {
+    public UsersService(UsersRepository usersRepository, AuthMethodsRepository authMethodsRepository) {
         this.usersRepository = usersRepository;
-        this.authMethodRepository = authMethodRepository;
+        this.authMethodsRepository = authMethodsRepository;
     }
 
     public Mono<UsersEntity> createUser(RegisterUserDTO dto) {
@@ -28,14 +28,14 @@ public class UsersService {
 
         return usersRepository.save(user)
                 .flatMap(savedUser -> {
-                    AuthMethodEntity authMethod = AuthMethodEntity.builder()
+                    AuthMethodsEntity authMethods = AuthMethodsEntity.builder()
                             .userId(savedUser.getId())
                             .provider("local")
                             .providerUserId(String.valueOf(savedUser.getId()))
                             .password(dto.getPassword())
                             .build();
 
-                    return authMethodRepository.save(authMethod)
+                    return authMethodsRepository.save(authMethods)
                             .thenReturn(savedUser); // devolvemos el usuario después de guardar el método de auth
                 });
     }
