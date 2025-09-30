@@ -17,7 +17,6 @@ public class FirebaseConfig {
     public FirebaseAuth firebaseAuth() throws IOException {
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseOptions options = FirebaseOptions.builder()
-                    // ⚠️ ruta al archivo de credenciales serviceAccountKey.json
                     .setCredentials(GoogleCredentials.fromStream(new FileInputStream("src/main/resources/serviceAccountKey.json")))
                     .build();
             FirebaseApp.initializeApp(options);

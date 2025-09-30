@@ -20,9 +20,11 @@ public class FirebaseTokenValidator implements ValidateFirebaseTokenUseCase {
     }
 
     @Override
-    public Mono<FirebaseUser> execute(String token) throws FirebaseAuthException {
-        FirebaseToken decoded = firebaseAuth.verifyIdToken(token);
-        UserRecord user = firebaseAuth.getUser(decoded.getUid());
-        return new FirebaseUser(user.getUid(), user.getEmail());
+    public Mono<FirebaseUser> execute(String token) {
+        return Mono.fromCallable(() -> {
+            FirebaseToken decoded = firebaseAuth.verifyIdToken(token);
+            UserRecord user = firebaseAuth.getUser(decoded.getUid());
+            return new FirebaseUser(user.getUid(), user.getEmail());
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 }
