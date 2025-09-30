@@ -20,7 +20,7 @@ public class UsersEntity {
     }
 
     @Id
-    private Long id; // R2DBC asigna automáticamente si la columna es SERIAL/IDENTITY
+    private Integer id; // R2DBC asigna automáticamente si la columna es SERIAL/IDENTITY
 
     @Column("profile_picture")
     private String profilePicture;
