@@ -3,7 +3,7 @@ name: CI/CD Backend Spring Boot with Docker on Render
 on:
   push:
     branches:
-      - dev
+      - main
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
