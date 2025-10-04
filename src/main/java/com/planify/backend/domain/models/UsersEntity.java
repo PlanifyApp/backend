@@ -46,4 +46,7 @@ public class UsersEntity {
 
     @Column("email")
     private String email;
+
+    @Column("googleid")
+    private String googleId;
 }
