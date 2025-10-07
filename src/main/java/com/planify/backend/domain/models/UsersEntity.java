@@ -49,4 +49,7 @@ public class UsersEntity {
 
     @Column("googleid")
     private String googleId;
+
+    @Column("created_at")
+    private java.time.LocalDateTime createdAt;
 }
