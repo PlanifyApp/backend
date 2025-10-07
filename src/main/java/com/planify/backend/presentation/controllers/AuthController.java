@@ -2,7 +2,6 @@ package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.GoogleLoginRequestDTO;
 import com.planify.backend.application.dtos.LoginResponseDTO;
-import com.planify.backend.application.use_cases.GoogleAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,6 +10,7 @@ import com.planify.backend.application.use_cases.ValidateFirebaseTokenUseCase;
 import com.planify.backend.domain.models.FirebaseUser;
 import org.springframework.http.ResponseEntity;
 
+import com.planify.backend.application.use_cases.GoogleAuthUseCase;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -18,10 +18,11 @@ import reactor.core.publisher.Mono;
 public class AuthController {
     private final ValidateFirebaseTokenUseCase validateToken;
 
-    private final GoogleAuthService googleAuthService;
+    private final GoogleAuthUseCase googleAuthUseCase;
 
-    public AuthController(ValidateFirebaseTokenUseCase validateToken) {
+    public AuthController(ValidateFirebaseTokenUseCase validateToken, GoogleAuthUseCase googleAuthUseCase) {
         this.validateToken = validateToken;
+        this.googleAuthUseCase = googleAuthUseCase;
     }
 
     @GetMapping("/me")
@@ -33,8 +34,13 @@ public class AuthController {
     }
 
     @PostMapping("/google")
-    public Mono<LoginResponseDTO> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
-        return googleAuthService.authenticateWithGoogle(request.getIdToken());
+    public Mono<ResponseEntity<LoginResponseDTO>> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
+        return googleAuthUseCase.execute(request.getIdToken())
+                .map(ResponseEntity::ok)
+                .onErrorResume(ex -> {
+                    // mapear errores (token inválido, email no verificado, etc.)
+                    return Mono.just(ResponseEntity.status(401).build());
+                });
     }
 }
 
