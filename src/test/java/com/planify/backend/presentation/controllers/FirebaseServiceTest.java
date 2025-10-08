@@ -3,7 +3,6 @@ package com.planify.backend.presentation.controllers;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import com.google.firebase.auth.UserRecord;
-import com.planify.backend.domain.models.FirebaseUser;
 import com.planify.backend.infrastructure.security.firebase.FirebaseTokenValidator;
 
 import reactor.core.publisher.Mono;
