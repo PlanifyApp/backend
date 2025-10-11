@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.planify.backend.application.use_cases.GoogleAuthUseCase;
 import reactor.core.publisher.Mono;
+import com.planify.backend.domain.models.UsersEntity;
 
 @RestController
 @RequestMapping("/auth")
@@ -34,13 +35,13 @@ public class AuthController {
     }
 
     @PostMapping("/google")
-    public Mono<ResponseEntity<LoginResponseDTO>> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
-        return googleAuthUseCase.execute(request.getIdToken())
-                .map(ResponseEntity::ok)
-                .onErrorResume(ex -> {
-                    // mapear errores (token inválido, email no verificado, etc.)
-                    return Mono.just(ResponseEntity.status(401).build());
-                });
+    public ResponseEntity<?> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
+        try {
+            UsersEntity user = googleAuthUseCase.authenticate(request);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body("Token inválido o expirado: " + e.getMessage());
+        }
     }
 }
 

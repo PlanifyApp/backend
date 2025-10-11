@@ -1,45 +1,56 @@
-// src/main/java/com/planify/backend/application/use_cases/GoogleAuthUseCaseImpl.java
 package com.planify.backend.application.use_cases;
 
-import com.google.firebase.auth.FirebaseAuthException;
-import com.planify.backend.application.dtos.LoginResponseDTO;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.planify.backend.application.dtos.GoogleLoginRequestDTO;
 import com.planify.backend.domain.models.UsersEntity;
-import com.planify.backend.infrastructure.repositories.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
 public class GoogleAuthUseCaseImpl implements GoogleAuthUseCase {
 
-    private final ValidateFirebaseTokenUseCase validateFirebaseTokenUseCase; // ya existe en tu proyecto
-    private final UsersRepository usersRepository;
+    // ⚠️ Reemplaza este clientId por el de tu proyecto en Google Cloud Console
+    private static final String CLIENT_ID = "TU_CLIENT_ID.apps.googleusercontent.com";
 
-@Override
-public Mono<LoginResponseDTO> execute(String idToken) {
-    return Mono.fromCallable(() -> validateFirebaseTokenUseCase.execute(idToken))
-        .flatMap(mono -> mono) // porque execute() ya devuelve un Mono
-        .flatMap(firebaseUser ->
-            usersRepository.findByGoogleId(firebaseUser.uid())
-                .switchIfEmpty(Mono.defer(() -> {
-                    UsersEntity newUser = new UsersEntity();
-                    newUser.setGoogleId(firebaseUser.uid());
-                    newUser.setEmail(firebaseUser.email());
-                    newUser.setRole("ROLE_USER");
-                    newUser.setCreatedAt(LocalDateTime.now());
-                    return usersRepository.save(newUser);
-                }))
-                .flatMap(savedUser -> usersRepository.save(savedUser)
-                        .onErrorResume(e -> Mono.just(savedUser)))
-                .map(savedUser -> new LoginResponseDTO(firebaseUser.uid(), savedUser))
-        )
-        .onErrorResume(FirebaseAuthException.class, e -> {
-            // Si el token es inválido o expira, devuelves error controlado
-            return Mono.error(new RuntimeException("Token de Firebase inválido o expirado: " + e.getMessage()));
-        });
+    @Override
+    public UsersEntity authenticate(GoogleLoginRequestDTO request) {
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                    new NetHttpTransport(),
+                    new JacksonFactory()
+            ).setAudience(Collections.singletonList(CLIENT_ID)).build();
+
+            GoogleIdToken idToken = verifier.verify(request.getIdToken());
+
+            if (idToken == null) {
+                throw new RuntimeException("Token de Google inválido");
+            }
+
+            Payload payload = idToken.getPayload();
+
+            String email = payload.getEmail();
+            String firstname = (String) payload.get("firstname");
+            String lastname = (String) payload.get("lastname");
+            String pictureUrl = (String) payload.get("picture");
+
+            // Aquí puedes buscar o crear el usuario en tu BD
+            UsersEntity user = new UsersEntity();
+            user.setEmail(email);
+            user.setFirstname(firstname);
+            user.setLastname(lastname);
+            user.setProfilePicture(pictureUrl);
+
+            return user;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error al verificar token de Google", e);
+        }
     }
-
 }

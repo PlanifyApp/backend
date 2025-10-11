@@ -1,8 +1,8 @@
 package com.planify.backend.application.use_cases;
 
-import com.planify.backend.application.dtos.LoginResponseDTO;
-import reactor.core.publisher.Mono;
+import com.planify.backend.application.dtos.GoogleLoginRequestDTO;
+import com.planify.backend.domain.models.UsersEntity;
 
 public interface GoogleAuthUseCase {
-    Mono<LoginResponseDTO> execute(String idToken);
+    UsersEntity authenticate(GoogleLoginRequestDTO request);
 }

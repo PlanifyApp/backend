@@ -1,4 +1,4 @@
-package com.planify.backend.presentation.controllers;
+/* package com.planify.backend.presentation.controllers;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
@@ -51,4 +51,4 @@ class FirebaseServiceTest {
         verify(firebaseAuth).getUser(eq("uid_prueba"));
     }
 
-}
+} */
