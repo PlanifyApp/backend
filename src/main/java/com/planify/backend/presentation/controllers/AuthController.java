@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import com.google.firebase.auth.FirebaseAuthException;
-import com.planify.backend.application.use_cases.ValidateFirebaseTokenUseCase;
-import com.planify.backend.domain.models.FirebaseUser;
+/* import com.planify.backend.application.use_cases.ValidateFirebaseTokenUseCase;
+import com.planify.backend.domain.models.FirebaseUser; */
 import org.springframework.http.ResponseEntity;
 
 import com.planify.backend.application.use_cases.GoogleAuthUseCase;
@@ -17,22 +17,22 @@ import com.planify.backend.domain.models.UsersEntity;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    private final ValidateFirebaseTokenUseCase validateToken;
+    //private final ValidateFirebaseTokenUseCase validateToken;
 
     private final GoogleAuthUseCase googleAuthUseCase;
 
-    public AuthController(ValidateFirebaseTokenUseCase validateToken, GoogleAuthUseCase googleAuthUseCase) {
-        this.validateToken = validateToken;
+    public AuthController(/* ValidateFirebaseTokenUseCase validateToken, */ GoogleAuthUseCase googleAuthUseCase) {
+        //this.validateToken = validateToken;
         this.googleAuthUseCase = googleAuthUseCase;
     }
 
-    @GetMapping("/me")
+    /* @GetMapping("/me")
     public Mono<ResponseEntity<FirebaseUser>> getAuthenticateUser(@RequestHeader("Authorization") String authHeader) throws FirebaseAuthException {
         String token = authHeader.replace("Bearer ", "");
         return validateToken.execute(token)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.status(401).build());
-    }
+    } */
 
     @PostMapping("/google")
     public ResponseEntity<?> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
