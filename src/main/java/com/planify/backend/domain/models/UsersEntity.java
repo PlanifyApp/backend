@@ -52,4 +52,7 @@ public class UsersEntity {
 
     @Column("created_at")
     private java.time.LocalDateTime createdAt;
+
+    @Column("token")
+    private transient String token; // no persistido
 }

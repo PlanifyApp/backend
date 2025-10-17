@@ -35,13 +35,12 @@ public class AuthController {
     } */
 
     @PostMapping("/google")
-    public ResponseEntity<?> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
-        try {
-            UsersEntity user = googleAuthUseCase.authenticate(request);
-            return ResponseEntity.ok(user);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body("Token inválido o expirado: " + e.getMessage());
-        }
+    public Mono<ResponseEntity<UsersEntity>> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
+    return googleAuthUseCase.authenticate(request)
+            .map(ResponseEntity::ok)
+            .onErrorResume(e ->
+                    Mono.just(ResponseEntity.status(401).build())
+            );
     }
 }
 
