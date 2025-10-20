@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.annotation.Transient;
 
 @Data
 @Builder
@@ -31,12 +32,12 @@ public class UsersEntity {
     @Column("lastname")
     private String lastname;
 
-    @Column("username")
-    private String username;
-
     // En R2DBC no hay @Enumerated, se guarda como texto
     @Column("gender")
     private GenderEnum gender;
+
+    @Column("username")
+    private String username;
 
     @Column("role")
     private String role;
@@ -47,12 +48,10 @@ public class UsersEntity {
     @Column("email")
     private String email;
 
-    @Column("googleid")
-    private String googleId;
-
     @Column("created_at")
     private java.time.LocalDateTime createdAt;
 
-    @Column("token")
-    private transient String token; // no persistido
+    // ⚙️ Campo no persistido, útil para devolver tokens JWT u otros
+    @Transient
+    private String token; // no persistido
 }

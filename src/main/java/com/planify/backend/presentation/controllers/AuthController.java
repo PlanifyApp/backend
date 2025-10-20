@@ -1,30 +1,19 @@
 package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.GoogleLoginRequestDTO;
-import com.planify.backend.application.dtos.LoginResponseDTO;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
-import com.google.firebase.auth.FirebaseAuthException;
-/* import com.planify.backend.application.use_cases.ValidateFirebaseTokenUseCase;
-import com.planify.backend.domain.models.FirebaseUser; */
-import org.springframework.http.ResponseEntity;
-
-import com.planify.backend.application.use_cases.GoogleAuthUseCase;
-import reactor.core.publisher.Mono;
+import com.planify.backend.application.use_cases.GoogleAuthService;
 import com.planify.backend.domain.models.UsersEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/auth")
 public class AuthController {
-    //private final ValidateFirebaseTokenUseCase validateToken;
 
-    private final GoogleAuthUseCase googleAuthUseCase;
-
-    public AuthController(/* ValidateFirebaseTokenUseCase validateToken, */ GoogleAuthUseCase googleAuthUseCase) {
-        //this.validateToken = validateToken;
-        this.googleAuthUseCase = googleAuthUseCase;
-    }
+    private final GoogleAuthService googleAuthService;
 
     /* @GetMapping("/me")
     public Mono<ResponseEntity<FirebaseUser>> getAuthenticateUser(@RequestHeader("Authorization") String authHeader) throws FirebaseAuthException {
@@ -34,13 +23,25 @@ public class AuthController {
                 .defaultIfEmpty(ResponseEntity.status(401).build());
     } */
 
+    /**
+     * 🔐 Endpoint principal para autenticación con Google.
+     * Recibe un idToken desde el frontend y crea o devuelve el usuario asociado.
+     */
     @PostMapping("/google")
-    public Mono<ResponseEntity<UsersEntity>> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
-    return googleAuthUseCase.authenticate(request)
-            .map(ResponseEntity::ok)
-            .onErrorResume(e ->
-                    Mono.just(ResponseEntity.status(401).build())
-            );
+    public Mono<ResponseEntity<?>> loginWithGoogle(@RequestBody GoogleLoginRequestDTO request) {
+        System.out.println("\n[AuthController] Petición de login con Google recibida...");
+
+        return googleAuthService.authenticate(request)
+            .<ResponseEntity<?>>map(user -> {
+                System.out.println("Usuario autenticado: " + user.getEmail());
+                return ResponseEntity.ok(user);
+            })
+            .onErrorResume(e -> {
+                System.out.println("Error en loginWithGoogle: " + e.getMessage());
+                return Mono.just(ResponseEntity
+                        .status(401)
+                        .body("Error de autenticación con Google: " + e.getMessage()));
+            });
     }
 }
 
