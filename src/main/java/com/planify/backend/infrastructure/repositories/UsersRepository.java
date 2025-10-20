@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UsersRepository extends R2dbcRepository<UsersEntity, Long> {
-    Mono<UsersEntity> findByGoogleId(String googleId);
+
+    Mono<UsersEntity> findByEmail(String email);
 
 }
