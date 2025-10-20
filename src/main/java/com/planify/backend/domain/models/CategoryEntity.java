@@ -14,11 +14,13 @@ import org.springframework.data.relational.core.mapping.Table;
 public class CategoryEntity {
     @Id
     private Long id;
+
     private String name;
     private Integer budgeted;
+
     @Column("percent_spent")
-    private Double percenSpent;
+    private Double percentSpent;
+
     @Column("user_id")
     private Integer userId;
-
 }
