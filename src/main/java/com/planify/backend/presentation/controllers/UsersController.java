@@ -16,9 +16,9 @@ public class UsersController {
         this.usersService = usersService;
     }
 
-    @PostMapping
-    public Mono<UsersEntity> createUser(@RequestBody RegisterUserDTO user) {
-        return usersService.createUser(user);
+    @PostMapping("/register")
+    public Mono<UsersEntity> register(@RequestBody RegisterUserDTO user) {
+        return usersService.registerUser(user);
     }
 
     @GetMapping
@@ -26,4 +26,5 @@ public class UsersController {
         return usersService.getAllUsers();
     }
 }
+
 

@@ -1,12 +1,10 @@
 package com.planify.backend.application.dtos;
-
-import com.planify.backend.domain.models.UsersEntity;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @AllArgsConstructor
 public class LoginResponseDTO {
+    private String email;
     private String token;
-    private UsersEntity user;
 }

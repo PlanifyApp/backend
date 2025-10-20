@@ -91,7 +91,7 @@ public class GoogleAuthService {
             .flatMap(authMethod -> {
                 System.out.println("AuthMethod existente para googleId: " + sub);
                 // Recuperamos el usuario y actualizamos last_login, etc.
-                return usersRepository.findById(authMethod.getUserId())
+                return usersRepository.findById(authMethod.getUserId().longValue())
                     .flatMap(existingUser -> {
                         System.out.println("Usuario existente: " + existingUser.getEmail());
                         existingUser.setProfilePicture(picture);
@@ -121,7 +121,7 @@ public class GoogleAuthService {
                 return usersRepository.save(newUser)
                     .flatMap(savedUser -> {
                         AuthMethodsEntity auth = new AuthMethodsEntity();
-                        auth.setUserId(savedUser.getId());
+                        auth.setUserId(savedUser.getId().intValue());
                         auth.setProvider("google");
                         auth.setProviderUserId(sub);
                         auth.setCreatedAt(java.time.LocalDateTime.now());
