@@ -23,13 +23,16 @@ public class AuthMethodsEntity {
     @Column("user_id")
     private Integer userId;
 
+    // Ejemplo: "local", "google", "facebook"
     private String provider;
 
+    // Ejemplo: para Google sería el "sub" (ID único de Google)
     @Column("provider_user_id")
     private String providerUserId;
 
+    // Si tu tabla lo maneja, útil cuando el método es "local"
+    private String password;
+
     @Column("created_at")
     private LocalDateTime createdAt;
-
-    private String password; // si tu tabla lo maneja, útil para "local"
 }
