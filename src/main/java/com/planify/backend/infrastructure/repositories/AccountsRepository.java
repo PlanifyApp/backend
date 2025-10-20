@@ -10,5 +10,7 @@ public interface AccountsRepository extends R2dbcRepository<AccountsEntity, Long
 
     // Como en JPA era boolean, en R2DBC debe devolver Mono<Boolean>
     Mono<Boolean> existsByWalletId(Long walletId);
+
+    Mono<AccountsEntity> findByIdAndUserId(Long id, Long userId);
 }
 
