@@ -1,13 +1,13 @@
 package com.planify.backend.application.mappers;
 
-import com.planify.backend.application.dtos.VariableExpenses;
+import com.planify.backend.application.dtos.VariableExpensesDTO;
 import com.planify.backend.domain.models.GoalType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VariableExpensesMappers {
+public class VariableExpensesMappersApp {
 
-    public com.planify.backend.domain.models.VariableExpenses toDomain(VariableExpenses dto) {
+    public com.planify.backend.domain.models.VariableExpenses toDomain(VariableExpensesDTO dto) {
         return new com.planify.backend.domain.models.VariableExpenses(
                 null,
                 dto.getUserId(),
@@ -21,8 +21,8 @@ public class VariableExpensesMappers {
         );
     }
 
-    public VariableExpenses toResponse(com.planify.backend.domain.models.VariableExpenses domain) {
-        VariableExpenses response = new VariableExpenses();
+    public VariableExpensesDTO toResponse(com.planify.backend.domain.models.VariableExpenses domain) {
+        VariableExpensesDTO response = new VariableExpensesDTO();
         response.setId(domain.getId());
         response.setUserId(domain.getUserId());
         response.setName(domain.getName());

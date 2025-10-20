@@ -1,6 +1,6 @@
 package com.planify.backend.presentation.controllers;
 
-import com.planify.backend.application.dtos.VariableExpenses;
+import com.planify.backend.application.dtos.VariableExpensesDTO;
 import com.planify.backend.application.use_cases.VariableExpensesUseCases;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,23 +18,23 @@ public class VariableExpensesController {
     }
 
     @GetMapping("/")
-    public Flux<ResponseEntity<VariableExpenses>> findAll() {
+    public Flux<ResponseEntity<VariableExpensesDTO>> findAll() {
         return variableExpensesUseCases.findAll().map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/")
-    public Mono<ResponseEntity<VariableExpenses>> save(VariableExpenses variableExpenses) {
-        return variableExpensesUseCases.save(variableExpenses).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<VariableExpensesDTO>> save(VariableExpensesDTO variableExpensesDTO) {
+        return variableExpensesUseCases.save(variableExpensesDTO).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}")
-    public Mono<ResponseEntity<VariableExpenses>> findById(@PathVariable Integer id) {
+    public Mono<ResponseEntity<VariableExpensesDTO>> findById(@PathVariable Integer id) {
         return variableExpensesUseCases.findById(id).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/")
-    public Mono<ResponseEntity<VariableExpenses>> update(VariableExpenses variableExpenses) {
-        return variableExpensesUseCases.update(variableExpenses).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<ResponseEntity<VariableExpensesDTO>> update(VariableExpensesDTO variableExpensesDTO) {
+        return variableExpensesUseCases.update(variableExpensesDTO).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

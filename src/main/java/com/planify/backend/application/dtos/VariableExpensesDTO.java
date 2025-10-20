@@ -1,6 +1,5 @@
 package com.planify.backend.application.dtos;
 
-import com.planify.backend.domain.models.GoalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VariableExpenses {
+public class VariableExpensesDTO {
 
     private Integer id;
     private Integer userId;
