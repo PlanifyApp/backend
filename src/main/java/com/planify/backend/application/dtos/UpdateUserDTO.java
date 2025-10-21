@@ -10,14 +10,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterUserDTO {
+public class UpdateUserDTO {
 
-    private String firstname;
-    private String lastname;
-    private String username;
+    private String firstName;
+    private String lastName;
     private String email;
     private String address;
     private String role;
     private UsersEntity.GenderEnum gender;
-    private String password;
+    private String password; // opcional, solo se actualiza si viene
 }

@@ -1,6 +1,5 @@
 package com.planify.backend.application.use_cases;
 
-
 import com.planify.backend.application.dtos.AccountsCreateDTO;
 import com.planify.backend.application.dtos.AccountsResponseDTO;
 import com.planify.backend.application.dtos.AccountsUpdateDTO;
@@ -9,9 +8,8 @@ import com.planify.backend.infrastructure.repositories.AccountsRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class AccountsService {
@@ -21,67 +19,85 @@ public class AccountsService {
         this.accountsRepository = accountsRepository;
     }
 
-    public List<AccountsResponseDTO> getAllAccounts() {
-        List<AccountsEntity> entities = accountsRepository.findAll();
-        List<AccountsResponseDTO> dtos = entities.stream().map(entity -> new AccountsResponseDTO(entity.getId(), entity.getName(), entity.getQuota(), entity.getBudgeted(), entity.getCurrentValue())).collect(Collectors.toList());
-        return dtos;
-
+    public Flux<AccountsResponseDTO> getAllAccounts() {
+        return accountsRepository.findAll()
+                .map(entity -> new AccountsResponseDTO(
+                        entity.getId(),
+                        entity.getName(),
+                        entity.getQuota(),
+                        entity.getBudgeted(),
+                        entity.getCurrentValue()
+                ));
     }
 
-    public AccountsResponseDTO getAccountById(Long id) {
-        AccountsEntity entity = accountsRepository.findById(id).orElse(null);
-        AccountsResponseDTO dto = new AccountsResponseDTO(entity.getId(), entity.getName(), entity.getQuota(), entity.getBudgeted(), entity.getCurrentValue());
-        return dto;
+    public Mono<AccountsResponseDTO> getAccountById(Long id) {
+        return accountsRepository.findById(id)
+                .map(entity -> new AccountsResponseDTO(
+                        entity.getId(),
+                        entity.getName(),
+                        entity.getQuota(),
+                        entity.getBudgeted(),
+                        entity.getCurrentValue()
+                ))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta no existe")));
     }
 
-    public AccountsResponseDTO createAccount(AccountsCreateDTO dto) {
-        boolean exists = (accountsRepository.existsById(dto.getId()) || accountsRepository.existsByWalletId(dto.getWallet_id()));
-        if (exists) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "La cuenta ya existe");
-        }
+    public Mono<AccountsResponseDTO> createAccount(AccountsCreateDTO dto) {
+        return accountsRepository.existsById(dto.getId())
+                .flatMap(exists -> {
+                    if (exists) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "La cuenta ya existe"));
+                    }
+                    return accountsRepository.existsByWalletId(dto.getWallet_id())
+                            .flatMap(walletExists -> {
+                                if (walletExists) {
+                                    return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "La cuenta ya existe"));
+                                }
 
-        AccountsEntity entity = new AccountsEntity();
-        entity.setId(dto.getId());
-        entity.setWalletId(dto.getWallet_id());
-        entity.setName(dto.getName());
-        entity.setQuota(dto.getQuota());
-        entity.setBudgeted(dto.getBudgeted());
-        entity.setCurrentValue(dto.getCurrent_value());
-        entity.setUserId(dto.getUser_id());
+                                AccountsEntity entity = new AccountsEntity();
+                                entity.setId(dto.getId());
+                                entity.setWalletId(dto.getWallet_id());
+                                entity.setName(dto.getName());
+                                entity.setQuota(dto.getQuota());
+                                entity.setBudgeted(dto.getBudgeted());
+                                entity.setCurrentValue(dto.getCurrent_value());
+                                entity.setUserId(dto.getUser_id());
 
-        AccountsEntity saved = accountsRepository.save(entity);
-
-        return new AccountsResponseDTO(
-                saved.getId(), saved.getName(), saved.getQuota(), saved.getBudgeted(), saved.getCurrentValue()
-        );
+                                return accountsRepository.save(entity)
+                                        .map(saved -> new AccountsResponseDTO(
+                                                saved.getId(),
+                                                saved.getName(),
+                                                saved.getQuota(),
+                                                saved.getBudgeted(),
+                                                saved.getCurrentValue()
+                                        ));
+                            });
+                });
     }
 
-    public AccountsResponseDTO updateAccount(Long id, AccountsUpdateDTO dto) {
-        AccountsEntity entity = accountsRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
+    public Mono<AccountsResponseDTO> updateAccount(Long id, AccountsUpdateDTO dto) {
+        return accountsRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta no existe")))
+                .flatMap(entity -> {
+                    if (dto.getName() != null) entity.setName(dto.getName());
+                    if (dto.getQuota() != null) entity.setQuota(dto.getQuota());
+                    if (dto.getBudgeted() != null) entity.setBudgeted(dto.getBudgeted());
+                    if (dto.getCurrentValue() != null) entity.setCurrentValue(dto.getCurrentValue());
 
-        if (dto.getName() != null) {
-            entity.setName(dto.getName());
-        }
-        if (dto.getQuota() != null) {
-            entity.setQuota(dto.getQuota());
-        }
-        if (dto.getBudgeted() != null) {
-            entity.setBudgeted(dto.getBudgeted());
-        }
-        if (dto.getCurrentValue() != null) {
-            entity.setCurrentValue(dto.getCurrentValue());
-        }
-
-        AccountsEntity updated = accountsRepository.save(entity);
-
-        return new AccountsResponseDTO(
-                updated.getId(), updated.getName(), updated.getQuota(), updated.getBudgeted(), updated.getCurrentValue()
-        );
+                    return accountsRepository.save(entity)
+                            .map(updated -> new AccountsResponseDTO(
+                                    updated.getId(),
+                                    updated.getName(),
+                                    updated.getQuota(),
+                                    updated.getBudgeted(),
+                                    updated.getCurrentValue()
+                            ));
+                });
     }
 
-    public void deleteAccount(Long id) {
-        AccountsEntity entity = accountsRepository.findById(id).orElseThrow(() ->  new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta no existe"));
-
-        accountsRepository.delete(entity);
+    public Mono<Void> deleteAccount(Long id) {
+        return accountsRepository.findById(id)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta no existe")))
+                .flatMap(entity -> accountsRepository.delete(entity));
     }
 }

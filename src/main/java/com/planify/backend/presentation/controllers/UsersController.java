@@ -4,6 +4,8 @@ import com.planify.backend.application.dtos.RegisterUserDTO;
 import com.planify.backend.application.use_cases.UsersService;
 import com.planify.backend.domain.models.UsersEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/users")
@@ -14,16 +16,15 @@ public class UsersController {
         this.usersService = usersService;
     }
 
-    @PostMapping
-    public UsersEntity createUser(@RequestBody RegisterUserDTO user){
-        System.out.println("Creating user: " + user);
-        return usersService.createUser(user);
+    @PostMapping("/register")
+    public Mono<UsersEntity> register(@RequestBody RegisterUserDTO user) {
+        return usersService.registerUser(user);
     }
 
     @GetMapping
-    public Iterable<UsersEntity> getAllUsers() {
-        System.out.println("Fetching all users");
+    public Flux<UsersEntity> getAllUsers() {
         return usersService.getAllUsers();
     }
-
 }
+
+
