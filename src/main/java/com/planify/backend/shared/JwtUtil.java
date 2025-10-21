@@ -1,4 +1,4 @@
-package com.planify.backend;
+package com.planify.backend.shared;
 import com.planify.backend.domain.models.UsersEntity;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

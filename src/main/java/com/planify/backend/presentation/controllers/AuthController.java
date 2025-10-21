@@ -1,5 +1,5 @@
 package com.planify.backend.presentation.controllers;
-import com.planify.backend.JwtUtil;
+import com.planify.backend.shared.JwtUtil;
 import com.planify.backend.application.dtos.GoogleLoginRequestDTO;
 import com.planify.backend.application.dtos.LoginRequestDTO;
 import com.planify.backend.application.dtos.LoginResponseDTO;
