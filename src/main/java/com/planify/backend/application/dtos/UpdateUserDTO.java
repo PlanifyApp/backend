@@ -18,5 +18,5 @@ public class UpdateUserDTO {
     private String address;
     private String role;
     private UsersEntity.GenderEnum gender;
-    private String password; // opcional, solo se actualiza si viene
+    private String password;
 }
