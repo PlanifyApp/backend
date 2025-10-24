@@ -26,7 +26,7 @@ public class UsersService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ✅ Registrar usuario
+
     public Mono<UsersEntity> registerUser(RegisterUserDTO dto) {
         UsersEntity user = UsersEntity.builder()
                 .email(dto.getEmail())
@@ -52,7 +52,7 @@ public class UsersService {
                 });
     }
 
-    // ✅ Actualizar usuario
+
     public Mono<UsersEntity> updateUser(Integer id, UpdateUserDTO dto, String photoUrl) {
         return usersRepository.findById(id.longValue())
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
@@ -63,14 +63,35 @@ public class UsersService {
                     user.setAddress(dto.getAddress());
                     user.setRole(dto.getRole());
                     user.setGender(dto.getGender() != null ? dto.getGender() : user.getGender());
+
                     if (photoUrl != null && !photoUrl.isBlank()) {
                         user.setProfilePicture(photoUrl);
                     }
-                    return usersRepository.save(user);
+
+                    return usersRepository.save(user)
+                            .flatMap(savedUser -> {
+                                // Solo actualizar la contraseña si el provider es local
+                                if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+                                    return authMethodsRepository.findByUserIdAndProvider(savedUser.getId().intValue(), "local")
+                                            .flatMap(auth -> {
+                                                auth.setPassword(passwordEncoder.encode(dto.getPassword()));
+                                                return authMethodsRepository.save(auth).thenReturn(savedUser);
+                                            })
+                                            .switchIfEmpty(Mono.error(new RuntimeException("No se puede actualizar la contraseña porque el proveedor no es local")));
+                                }
+                                return Mono.just(savedUser);
+                            });
                 });
     }
 
-    // ✅ Borrado lógico
+    public Mono<UsersEntity> getUserById(Integer id) {
+        return usersRepository.findById(id.longValue())
+                .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")));
+    }
+
+
+
+
     public Mono<Void> deleteUser(Integer id) {
         return usersRepository.findById(id.longValue())
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
@@ -81,7 +102,7 @@ public class UsersService {
                 .then();
     }
 
-    // ✅ Autenticación email + password
+
     public Mono<UsersEntity> authenticate(String email, String password) {
         return usersRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
@@ -96,10 +117,5 @@ public class UsersService {
                                     }
                                 })
                 );
-    }
-
-    // ✅ Listar todos los usuarios
-    public Flux<UsersEntity> getAllUsers() {
-        return usersRepository.findAll();
     }
 }
