@@ -4,6 +4,7 @@ import com.planify.backend.application.dtos.RegisterUserDTO;
 import com.planify.backend.application.dtos.UpdateUserDTO;
 import com.planify.backend.application.use_cases.UsersService;
 import com.planify.backend.domain.models.UsersEntity;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,10 +20,9 @@ public class UsersController {
     }
 
     @PostMapping("/register")
-    public Mono<UsersEntity> register(@RequestBody RegisterUserDTO user) {
+    public Mono<UsersEntity> register(@Valid @RequestBody RegisterUserDTO user) {
         return usersService.registerUser(user);
     }
-
 
     @GetMapping("/{id}")
     public Mono<UsersEntity> getUserById(@PathVariable Integer id) {

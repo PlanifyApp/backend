@@ -32,7 +32,7 @@ public class UsersService {
                 .email(dto.getEmail())
                 .firstname(dto.getFirstname())
                 .lastname(dto.getLastname())
-                .gender(dto.getGender() != null ? dto.getGender() : UsersEntity.GenderEnum.other)
+                .gender(dto.getGender())
                 .username(dto.getUsername())
                 .role("USER")
                 .address(dto.getAddress() != null ? dto.getAddress() : "Sin dirección") // valor por defecto
