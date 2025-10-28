@@ -6,7 +6,6 @@ import com.planify.backend.application.use_cases.UsersService;
 import com.planify.backend.domain.models.UsersEntity;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController

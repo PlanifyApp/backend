@@ -8,7 +8,6 @@ import com.planify.backend.infrastructure.repositories.AuthMethodsRepository;
 import com.planify.backend.infrastructure.repositories.UsersRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -57,32 +56,52 @@ public class UsersService {
         return usersRepository.findById(id.longValue())
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
                 .flatMap(user -> {
-                    user.setFirstname(dto.getFirstName());
-                    user.setLastname(dto.getLastName());
-                    user.setEmail(dto.getEmail());
-                    user.setAddress(dto.getAddress());
-                    user.setRole(dto.getRole());
-                    user.setGender(dto.getGender() != null ? dto.getGender() : user.getGender());
+                    // Solo actualizar si el campo fue enviado (no null ni vacío)
+                    if (dto.getFirstName() != null && !dto.getFirstName().isBlank()) {
+                        user.setFirstname(dto.getFirstName());
+                    }
+                    if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
+                        user.setUsername(dto.getUsername());
+                    }
+                    if (dto.getLastName() != null && !dto.getLastName().isBlank()) {
+                        user.setLastname(dto.getLastName());
+                    }
+                    if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+                        user.setEmail(dto.getEmail());
+                    }
+                    if (dto.getAddress() != null && !dto.getAddress().isBlank()) {
+                        user.setAddress(dto.getAddress());
+                    }
+                    if (dto.getRole() != null && !dto.getRole().isBlank()) {
+                        user.setRole(dto.getRole());
+                    }
+                    if (dto.getGender() != null) {
+                        user.setGender(dto.getGender());
+                    }
 
+                    // Foto opcional
                     if (photoUrl != null && !photoUrl.isBlank()) {
                         user.setProfilePicture(photoUrl);
                     }
 
+                    // Guardar cambios
                     return usersRepository.save(user)
                             .flatMap(savedUser -> {
-                                // Solo actualizar la contraseña si el provider es local
+                                // Si viene nueva contraseña → actualizar auth_methods
                                 if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
                                     return authMethodsRepository.findByUserIdAndProvider(savedUser.getId().intValue(), "local")
                                             .flatMap(auth -> {
                                                 auth.setPassword(passwordEncoder.encode(dto.getPassword()));
                                                 return authMethodsRepository.save(auth).thenReturn(savedUser);
                                             })
-                                            .switchIfEmpty(Mono.error(new RuntimeException("No se puede actualizar la contraseña porque el proveedor no es local")));
+                                            .switchIfEmpty(Mono.error(new RuntimeException(
+                                                    "No se puede actualizar la contraseña porque el proveedor no es local")));
                                 }
                                 return Mono.just(savedUser);
                             });
                 });
     }
+
 
     public Mono<UsersEntity> getUserById(Integer id) {
         return usersRepository.findById(id.longValue())
