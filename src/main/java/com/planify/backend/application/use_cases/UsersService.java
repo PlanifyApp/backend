@@ -8,7 +8,6 @@ import com.planify.backend.infrastructure.repositories.AuthMethodsRepository;
 import com.planify.backend.infrastructure.repositories.UsersRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -26,13 +25,13 @@ public class UsersService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // ✅ Registrar usuario
+
     public Mono<UsersEntity> registerUser(RegisterUserDTO dto) {
         UsersEntity user = UsersEntity.builder()
                 .email(dto.getEmail())
-                .firstname(dto.getFirstname())
-                .lastname(dto.getLastname())
-                .gender(dto.getGender() != null ? dto.getGender() : UsersEntity.GenderEnum.other)
+                .firstname(dto.getFirstname() != null ? dto.getFirstname() : "Sin nombre")
+                .lastname(dto.getLastname() != null ? dto.getLastname() : "Sin apellido")
+                .gender(dto.getGender())
                 .username(dto.getUsername())
                 .role("USER")
                 .address(dto.getAddress() != null ? dto.getAddress() : "Sin dirección") // valor por defecto
@@ -52,25 +51,63 @@ public class UsersService {
                 });
     }
 
-    // ✅ Actualizar usuario
+
     public Mono<UsersEntity> updateUser(Integer id, UpdateUserDTO dto, String photoUrl) {
         return usersRepository.findById(id.longValue())
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
                 .flatMap(user -> {
-                    user.setFirstname(dto.getFirstName());
-                    user.setLastname(dto.getLastName());
-                    user.setEmail(dto.getEmail());
-                    user.setAddress(dto.getAddress());
-                    user.setRole(dto.getRole());
-                    user.setGender(dto.getGender() != null ? dto.getGender() : user.getGender());
+                    // Solo actualizar si el campo fue enviado (no null ni vacío)
+                    if (dto.getFirstName() != null && !dto.getFirstName().isBlank()) {
+                        user.setFirstname(dto.getFirstName());
+                    }
+                    if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
+                        user.setUsername(dto.getUsername());
+                    }
+                    if (dto.getLastName() != null && !dto.getLastName().isBlank()) {
+                        user.setLastname(dto.getLastName());
+                    }
+                    if (dto.getAddress() != null && !dto.getAddress().isBlank()) {
+                        user.setAddress(dto.getAddress());
+                    }
+                    if (dto.getRole() != null && !dto.getRole().isBlank()) {
+                        user.setRole(dto.getRole());
+                    }
+                    if (dto.getGender() != null) {
+                        user.setGender(dto.getGender());
+                    }
+
+                    // Foto opcional
                     if (photoUrl != null && !photoUrl.isBlank()) {
                         user.setProfilePicture(photoUrl);
                     }
-                    return usersRepository.save(user);
+
+                    // Guardar cambios
+                    return usersRepository.save(user)
+                            .flatMap(savedUser -> {
+                                // Si viene nueva contraseña → actualizar auth_methods
+                                if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+                                    return authMethodsRepository.findByUserIdAndProvider(savedUser.getId().intValue(), "local")
+                                            .flatMap(auth -> {
+                                                auth.setPassword(passwordEncoder.encode(dto.getPassword()));
+                                                return authMethodsRepository.save(auth).thenReturn(savedUser);
+                                            })
+                                            .switchIfEmpty(Mono.error(new RuntimeException(
+                                                    "No se puede actualizar la contraseña porque el proveedor no es local")));
+                                }
+                                return Mono.just(savedUser);
+                            });
                 });
     }
 
-    // ✅ Borrado lógico
+
+    public Mono<UsersEntity> getUserById(Integer id) {
+        return usersRepository.findById(id.longValue())
+                .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")));
+    }
+
+
+
+
     public Mono<Void> deleteUser(Integer id) {
         return usersRepository.findById(id.longValue())
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
@@ -81,7 +118,7 @@ public class UsersService {
                 .then();
     }
 
-    // ✅ Autenticación email + password
+
     public Mono<UsersEntity> authenticate(String email, String password) {
         return usersRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
@@ -96,10 +133,5 @@ public class UsersService {
                                     }
                                 })
                 );
-    }
-
-    // ✅ Listar todos los usuarios
-    public Flux<UsersEntity> getAllUsers() {
-        return usersRepository.findAll();
     }
 }

@@ -21,58 +21,32 @@ public class AccountsService {
 
     public Flux<AccountsResponseDTO> getAllAccounts() {
         return accountsRepository.findAll()
-                .map(entity -> new AccountsResponseDTO(
-                        entity.getId(),
-                        entity.getName(),
-                        entity.getQuota(),
-                        entity.getBudgeted(),
-                        entity.getCurrentValue()
-                ));
+                .map(this::mapToResponse);
     }
 
     public Mono<AccountsResponseDTO> getAccountById(Long id) {
         return accountsRepository.findById(id)
-                .map(entity -> new AccountsResponseDTO(
-                        entity.getId(),
-                        entity.getName(),
-                        entity.getQuota(),
-                        entity.getBudgeted(),
-                        entity.getCurrentValue()
-                ))
+                .map(this::mapToResponse)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta no existe")));
     }
 
+    // 🔹 Nuevo: obtener cuentas por usuario
+    public Flux<AccountsResponseDTO> getAccountsByUserId(Long userId) {
+        return accountsRepository.findAllByUserId(userId)
+                .map(this::mapToResponse);
+    }
+
     public Mono<AccountsResponseDTO> createAccount(AccountsCreateDTO dto) {
-        return accountsRepository.existsById(dto.getId())
-                .flatMap(exists -> {
-                    if (exists) {
-                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "La cuenta ya existe"));
-                    }
-                    return accountsRepository.existsByWalletId(dto.getWallet_id())
-                            .flatMap(walletExists -> {
-                                if (walletExists) {
-                                    return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "La cuenta ya existe"));
-                                }
+        AccountsEntity entity = new AccountsEntity();
+        entity.setWalletId(dto.getWallet_id());
+        entity.setName(dto.getName());
+        entity.setQuota(dto.getQuota());
+        entity.setBudgeted(dto.getBudgeted());
+        entity.setCurrentValue(dto.getCurrent_value());
+        entity.setUserId(dto.getUser_id());
 
-                                AccountsEntity entity = new AccountsEntity();
-                                entity.setId(dto.getId());
-                                entity.setWalletId(dto.getWallet_id());
-                                entity.setName(dto.getName());
-                                entity.setQuota(dto.getQuota());
-                                entity.setBudgeted(dto.getBudgeted());
-                                entity.setCurrentValue(dto.getCurrent_value());
-                                entity.setUserId(dto.getUser_id());
-
-                                return accountsRepository.save(entity)
-                                        .map(saved -> new AccountsResponseDTO(
-                                                saved.getId(),
-                                                saved.getName(),
-                                                saved.getQuota(),
-                                                saved.getBudgeted(),
-                                                saved.getCurrentValue()
-                                        ));
-                            });
-                });
+        return accountsRepository.save(entity)
+                .map(this::mapToResponse);
     }
 
     public Mono<AccountsResponseDTO> updateAccount(Long id, AccountsUpdateDTO dto) {
@@ -84,20 +58,23 @@ public class AccountsService {
                     if (dto.getBudgeted() != null) entity.setBudgeted(dto.getBudgeted());
                     if (dto.getCurrentValue() != null) entity.setCurrentValue(dto.getCurrentValue());
 
-                    return accountsRepository.save(entity)
-                            .map(updated -> new AccountsResponseDTO(
-                                    updated.getId(),
-                                    updated.getName(),
-                                    updated.getQuota(),
-                                    updated.getBudgeted(),
-                                    updated.getCurrentValue()
-                            ));
+                    return accountsRepository.save(entity).map(this::mapToResponse);
                 });
     }
 
     public Mono<Void> deleteAccount(Long id) {
         return accountsRepository.findById(id)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "La cuenta no existe")))
-                .flatMap(entity -> accountsRepository.delete(entity));
+                .flatMap(accountsRepository::delete);
+    }
+
+    private AccountsResponseDTO mapToResponse(AccountsEntity entity) {
+        return new AccountsResponseDTO(
+                entity.getId(),
+                entity.getName(),
+                entity.getQuota(),
+                entity.getBudgeted(),
+                entity.getCurrentValue()
+        );
     }
 }
