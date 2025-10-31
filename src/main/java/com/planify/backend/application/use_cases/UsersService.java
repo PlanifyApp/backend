@@ -29,8 +29,8 @@ public class UsersService {
     public Mono<UsersEntity> registerUser(RegisterUserDTO dto) {
         UsersEntity user = UsersEntity.builder()
                 .email(dto.getEmail())
-                .firstname(dto.getFirstname())
-                .lastname(dto.getLastname())
+                .firstname(dto.getFirstname() != null ? dto.getFirstname() : "Sin nombre")
+                .lastname(dto.getLastname() != null ? dto.getLastname() : "Sin apellido")
                 .gender(dto.getGender())
                 .username(dto.getUsername())
                 .role("USER")
@@ -65,9 +65,6 @@ public class UsersService {
                     }
                     if (dto.getLastName() != null && !dto.getLastName().isBlank()) {
                         user.setLastname(dto.getLastName());
-                    }
-                    if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
-                        user.setEmail(dto.getEmail());
                     }
                     if (dto.getAddress() != null && !dto.getAddress().isBlank()) {
                         user.setAddress(dto.getAddress());
