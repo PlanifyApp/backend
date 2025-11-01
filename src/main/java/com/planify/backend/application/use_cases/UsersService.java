@@ -1,5 +1,4 @@
 package com.planify.backend.application.use_cases;
-
 import com.planify.backend.application.dtos.RegisterUserDTO;
 import com.planify.backend.application.dtos.UpdateUserDTO;
 import com.planify.backend.domain.models.AuthMethodsEntity;
