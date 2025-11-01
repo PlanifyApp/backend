@@ -12,7 +12,7 @@ import org.springframework.data.relational.core.mapping.Column;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table("accounts") // equivale a @Entity + @Table en JPA
+@Table("accounts")
 public class AccountsEntity {
 
     @Id
