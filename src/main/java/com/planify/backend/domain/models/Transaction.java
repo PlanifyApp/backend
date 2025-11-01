@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("transactions")
-public class MovementsEntity {
+public class Transaction {
     @Id
     private Integer id;
     @Column("user_id")
