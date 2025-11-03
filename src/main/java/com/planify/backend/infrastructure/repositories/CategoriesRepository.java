@@ -8,5 +8,6 @@ import reactor.core.publisher.Mono;
 public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEntity, Long> {
     Mono<CategoryEntity> findByName(String name);
     Flux<CategoryEntity> findByUserId(Integer userId);
+    Mono<CategoryEntity> findByIdAndUserId(Long id, Long userId);
 
 }
