@@ -5,20 +5,25 @@ import lombok.Data;
 
 import java.time.LocalDate;
 @Data
-public class MovementsDTO {
+public class TransactionDTO {
+
+    @NotNull
+    private Long userId;
+
     @NotBlank
     @Size(min = 3, max = 100)
     private String description;
 
-    @NotBlank
-    private String category;
+    @NotNull
+    private Long categoryId;
 
     @NotNull
     @Min(1)
     private Integer amount;
 
     @NotNull
-    @Pattern(regexp = "income|expense|saving|debt|transfer", message = "Tipo debe ser: income, expense, saving, debt o transfer")
+    @Pattern(regexp = "income|expense|saving|debt|transfer",
+            message = "Tipo debe ser: income, expense, saving, debt o transfer")
     private String type;
 
     @NotNull

@@ -1,6 +1,6 @@
 package com.planify.backend.application.use_cases;
 
-import com.planify.backend.application.dtos.MovementsDTO;
+import com.planify.backend.application.dtos.TransactionDTO;
 import com.planify.backend.domain.models.Transaction;
 import com.planify.backend.infrastructure.repositories.AccountsRepository;
 import com.planify.backend.infrastructure.repositories.CategoriesRepository;
@@ -25,19 +25,24 @@ public class TransactionsService {
     @Autowired
     private AccountsRepository accountsRepository;
 
-    public Mono<Transaction> createTransaction(MovementsDTO dto, Long userId) {
+    public Mono<Transaction> createTransaction(TransactionDTO dto, Long userId) {
+        // ✅ Validar que la cuenta pertenece al usuario
         return accountsRepository.findByIdAndUserId(dto.getAccountId(), userId)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Account not found or doesn't belong to user: " + dto.getAccountId()
+                        HttpStatus.NOT_FOUND,
+                        "Account not found or doesn't belong to user: " + dto.getAccountId()
                 )))
-                .flatMap(account -> categoriesRepository.findByName(dto.getCategory())
+                // ✅ Luego validar que la categoría pertenece al usuario
+                .flatMap(account -> categoriesRepository.findByIdAndUserId(dto.getCategoryId(), userId)
                         .switchIfEmpty(Mono.error(new ResponseStatusException(
-                                HttpStatus.NOT_FOUND, "Category not found: " + dto.getCategory()
+                                HttpStatus.NOT_FOUND,
+                                "Category not found or doesn't belong to user: " + dto.getCategoryId()
                         )))
+                        // ✅ Finalmente crear la transacción
                         .flatMap(category -> transactionsRepository.saveWithEnumCast(
                                 userId,
                                 dto.getAccountId(),
-                                category.getId(),
+                                dto.getCategoryId(),
                                 dto.getType(),
                                 dto.getDescription(),
                                 dto.getAmount(),
