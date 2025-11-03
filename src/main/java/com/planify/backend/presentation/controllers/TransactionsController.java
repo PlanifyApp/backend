@@ -1,27 +1,32 @@
 package com.planify.backend.presentation.controllers;
 
-import com.planify.backend.application.dtos.MovementsDTO;
+import com.planify.backend.application.dtos.TransactionDTO;
+import com.planify.backend.application.use_cases.TransactionViewService;
 import com.planify.backend.application.use_cases.TransactionsService;
+import com.planify.backend.domain.models.TransactionView;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping("/api/transactions")
 public class TransactionsController {
 
     @Autowired
     private TransactionsService transactionsService;
+    
+    @Autowired
+    private  TransactionViewService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<?> create(@Valid @RequestBody MovementsDTO dto) {
-        Long userId = 1L; // temporal, hasta tener autenticación
-        return transactionsService.createTransaction(dto, userId)
+    public Mono<?> create(@Valid @RequestBody TransactionDTO dto) {
+        return transactionsService.createTransaction(dto, dto.getUserId())
                 .map(saved -> Map.of(
                         "id", saved.getId(),
                         "description", saved.getDescription(),
@@ -34,9 +39,22 @@ public class TransactionsController {
                 ));
     }
 
+
     @GetMapping("/balance/{userId}")
     public Mono<Map<String, Object>> getBalance(@PathVariable Integer userId) {
         return transactionsService.getBalance(userId);
     }
+
+    @GetMapping("/user/{userId}")
+    public Flux<TransactionView> getByUserWithFilters(
+            @PathVariable Long userId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return service.findByUserIdWithFilters(userId, startDate, endDate, page, size);
+    }
+
 
 }
