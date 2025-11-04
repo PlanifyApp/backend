@@ -1,9 +1,11 @@
 package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.TransactionDTO;
+import com.planify.backend.application.use_cases.TransactionViewIncomeExpenseService;
 import com.planify.backend.application.use_cases.TransactionViewService;
 import com.planify.backend.application.use_cases.TransactionsService;
 import com.planify.backend.domain.models.TransactionView;
+import com.planify.backend.domain.models.TransactionViewIncomeExpense;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +24,9 @@ public class TransactionsController {
     
     @Autowired
     private  TransactionViewService service;
+
+    @Autowired
+    private TransactionViewIncomeExpenseService transactionViewIncomeExpenseService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -55,6 +60,22 @@ public class TransactionsController {
     ) {
         return service.findByUserIdWithFilters(userId, startDate, endDate, page, size);
     }
+
+    @GetMapping("/user/{userId}/account/{accountId}")
+    public Flux<TransactionViewIncomeExpense> getByUserWithFilters(
+            @PathVariable Long userId,
+            @PathVariable Long accountId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return transactionViewIncomeExpenseService.findByUserIdWithFilters(
+                userId, accountId, type, startDate, endDate, page, size
+        );
+    }
+
 
 
 }

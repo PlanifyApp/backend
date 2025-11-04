@@ -56,14 +56,14 @@ public class UsersService {
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
                 .flatMap(user -> {
                     // Solo actualizar si el campo fue enviado (no null ni vacío)
-                    if (dto.getFirstName() != null && !dto.getFirstName().isBlank()) {
-                        user.setFirstname(dto.getFirstName());
+                    if (dto.getFirstname() != null && !dto.getFirstname().isBlank()) {
+                        user.setFirstname(dto.getFirstname());
                     }
                     if (dto.getUsername() != null && !dto.getUsername().isBlank()) {
                         user.setUsername(dto.getUsername());
                     }
-                    if (dto.getLastName() != null && !dto.getLastName().isBlank()) {
-                        user.setLastname(dto.getLastName());
+                    if (dto.getLastname() != null && !dto.getLastname().isBlank()) {
+                        user.setLastname(dto.getLastname());
                     }
                     if (dto.getAddress() != null && !dto.getAddress().isBlank()) {
                         user.setAddress(dto.getAddress());
