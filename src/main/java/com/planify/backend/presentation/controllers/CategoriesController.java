@@ -2,6 +2,7 @@ package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
+import com.planify.backend.application.dtos.CategoryStatsResponse;
 import com.planify.backend.application.use_cases.CategoriesService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -35,5 +36,13 @@ public class CategoriesController {
     @DeleteMapping("/{id}")
     public Mono<Void> delete(@PathVariable Long id) {
         return categoriesService.deleteCategory(id);
+    }
+
+    @GetMapping("/stats/user/{userId}")
+    public Flux<CategoryStatsResponse> getCategoryStats(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) String type // opcional: income, expense
+    ) {
+        return categoriesService.getCategoryStatsByUserId(userId, type);
     }
 }
