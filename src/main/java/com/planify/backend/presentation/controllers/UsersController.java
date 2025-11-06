@@ -2,10 +2,12 @@ package com.planify.backend.presentation.controllers;
 import com.planify.backend.application.dtos.RegisterUserDTO;
 import com.planify.backend.application.dtos.UpdateUserDTO;
 import com.planify.backend.application.use_cases.UsersService;
+import com.planify.backend.domain.interfaces.S3Service;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -16,8 +18,11 @@ public class UsersController {
 
     private final UsersService usersService;
 
-    public UsersController(UsersService usersService) {
+    private final S3Service s3Service;
+
+    public UsersController(UsersService usersService, S3Service s3Service) {
         this.usersService = usersService;
+        this.s3Service = s3Service;
     }
 
     @PostMapping("/register")
@@ -54,14 +59,26 @@ public class UsersController {
                 });
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public Mono<ResponseEntity<Object>> updateUser(
             @PathVariable Integer id,
-            @RequestBody UpdateUserDTO dto,
-            @RequestParam(required = false) String photoUrl
+            @RequestPart("user") UpdateUserDTO dto,
+            @RequestPart(value = "file", required = false) FilePart filePart
     ) {
         log.info("📝 [PUT] Updating user ID {} with data: {}", id, dto);
-        return usersService.updateUser(id, dto, photoUrl)
+
+        Mono<String> photoUrlMono;
+
+        if (filePart != null) {
+            // 📸 Si viene un archivo, lo subimos al S3 y obtenemos la URL
+            photoUrlMono = s3Service.uploadFile(filePart);
+        } else {
+            // 🚫 Si no viene archivo, seteamos null
+            photoUrlMono = Mono.justOrEmpty((String) null);
+        }
+
+        return photoUrlMono
+                .flatMap(photoUrl -> usersService.updateUser(id, dto, photoUrl))
                 .map(updated -> {
                     log.info("✅ User {} updated successfully", id);
                     return ResponseEntity.ok((Object) updated);
@@ -78,6 +95,7 @@ public class UsersController {
                             .body((Object) new ErrorResponse(message, error.getMessage())));
                 });
     }
+
 
 
     @DeleteMapping("/{id}")
