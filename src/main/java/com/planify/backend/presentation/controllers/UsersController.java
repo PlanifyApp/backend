@@ -67,18 +67,15 @@ public class UsersController {
     ) {
         log.info("📝 [PUT] Updating user ID {} with data: {}", id, dto);
 
-        Mono<String> photoUrlMono;
-
-        if (filePart != null) {
-            // 📸 Si viene un archivo, lo subimos al S3 y obtenemos la URL
-            photoUrlMono = s3Service.uploadFile(filePart);
-        } else {
-            // 🚫 Si no viene archivo, seteamos null
-            photoUrlMono = Mono.justOrEmpty((String) null);
-        }
+        Mono<String> photoUrlMono = (filePart != null)
+                ? s3Service.uploadFile(filePart)
+                : Mono.just(""); // evitar null
 
         return photoUrlMono
-                .flatMap(photoUrl -> usersService.updateUser(id, dto, photoUrl))
+                .flatMap(photoUrl -> {
+                    String finalPhoto = (photoUrl != null && !photoUrl.isBlank()) ? photoUrl : null;
+                    return usersService.updateUser(id, dto, finalPhoto);
+                })
                 .map(updated -> {
                     log.info("✅ User {} updated successfully", id);
                     return ResponseEntity.ok((Object) updated);
@@ -95,6 +92,7 @@ public class UsersController {
                             .body((Object) new ErrorResponse(message, error.getMessage())));
                 });
     }
+
 
 
 

@@ -6,6 +6,7 @@ import com.planify.backend.application.use_cases.TransactionViewService;
 import com.planify.backend.application.use_cases.TransactionsService;
 import com.planify.backend.domain.models.TransactionView;
 import com.planify.backend.domain.models.TransactionViewIncomeExpense;
+import com.planify.backend.shared.PagedResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,7 +52,7 @@ public class TransactionsController {
     }
 
     @GetMapping("/user/{userId}")
-    public Flux<TransactionView> getByUserWithFilters(
+    public Mono<PagedResponse<TransactionView>> getByUserWithFilters(
             @PathVariable Long userId,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
@@ -60,6 +61,7 @@ public class TransactionsController {
     ) {
         return service.findByUserIdWithFilters(userId, startDate, endDate, page, size);
     }
+
 
     @GetMapping("/user/{userId}/account/{accountId}")
     public Flux<TransactionViewIncomeExpense> getByUserWithFilters(
