@@ -25,6 +25,4 @@ public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEnt
        """)
     Flux<CategoryStatsResponse> findCategoryStatsByUserIdAndType(Integer userId, String type);
 
-
-
 }
