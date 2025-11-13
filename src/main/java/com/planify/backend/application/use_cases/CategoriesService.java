@@ -1,7 +1,7 @@
 package com.planify.backend.application.use_cases;
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
-import com.planify.backend.application.dtos.CategoryStatsResponse;
+import com.planify.backend.domain.enums.CategoryType;
 import com.planify.backend.domain.models.CategoryEntity;
 import com.planify.backend.infrastructure.repositories.CategoriesRepository;
 import org.springframework.stereotype.Service;
@@ -24,18 +24,20 @@ public class CategoriesService {
 
     public Mono<CategoryResponse> createCategory(CategoryRequest request) {
         CategoryEntity entity = new CategoryEntity(
-                null,
+                (Long) null, // 👈 aclarar el tipo
                 request.getName(),
                 request.getBudgeted(),
                 request.getPercentSpent(),
-                request.getUserId()
+                request.getUserId(),
+                CategoryType.valueOf(request.getType().trim().toLowerCase())
         );
         return categoriesRepository.save(entity)
                 .map(this::toResponse);
     }
 
-    public Flux<CategoryStatsResponse> getCategoryStatsByUserId(Integer userId, String type) {
-        return categoriesRepository.findCategoryStatsByUserIdAndType(userId, type);
+    public Flux<CategoryResponse> getCategoriesByUserIdAndType(Integer userId, String type) {
+        return categoriesRepository.findByUserIdAndType(userId, type)
+                .map(this::toResponse);
     }
 
     public Mono<CategoryResponse> updateCategory(Long id, CategoryRequest request) {
@@ -61,7 +63,8 @@ public class CategoriesService {
                 entity.getName(),
                 entity.getBudgeted(),
                 entity.getPercentSpent(),
-                entity.getUserId()
+                entity.getUserId(),
+                entity.getType().name()
         );
     }
 }
