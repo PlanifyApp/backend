@@ -12,4 +12,5 @@ public class CategoryRequest {
     private Integer budgeted;
     private Double percentSpent;
     private Integer userId;
+    private String type;
 }

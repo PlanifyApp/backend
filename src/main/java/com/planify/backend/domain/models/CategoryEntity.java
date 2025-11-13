@@ -1,5 +1,6 @@
 package com.planify.backend.domain.models;
 
+import com.planify.backend.domain.enums.CategoryType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,4 +24,6 @@ public class CategoryEntity {
 
     @Column("user_id")
     private Integer userId;
+
+    private CategoryType type; // 👈 enum en vez de String
 }

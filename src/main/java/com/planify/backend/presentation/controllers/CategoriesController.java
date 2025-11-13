@@ -38,11 +38,11 @@ public class CategoriesController {
         return categoriesService.deleteCategory(id);
     }
 
-    @GetMapping("/stats/user/{userId}")
-    public Flux<CategoryStatsResponse> getCategoryStats(
+    @GetMapping("/user/{userId}/type")
+    public Flux<CategoryResponse> getCategoriesByType(
             @PathVariable Integer userId,
-            @RequestParam(required = false) String type // opcional: income, expense
+            @RequestParam String type // income o expense
     ) {
-        return categoriesService.getCategoryStatsByUserId(userId, type);
+        return categoriesService.getCategoriesByUserIdAndType(userId, type);
     }
 }
