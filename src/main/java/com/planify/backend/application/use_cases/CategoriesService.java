@@ -23,17 +23,15 @@ public class CategoriesService {
     }
 
     public Mono<CategoryResponse> createCategory(CategoryRequest request) {
-        CategoryEntity entity = new CategoryEntity(
-                (Long) null, // 👈 aclarar el tipo
+        return categoriesRepository.insertCategory(
                 request.getName(),
                 request.getBudgeted(),
                 request.getPercentSpent(),
                 request.getUserId(),
-                CategoryType.valueOf(request.getType().trim().toLowerCase())
-        );
-        return categoriesRepository.save(entity)
-                .map(this::toResponse);
+                request.getType().trim().toLowerCase()
+        ).map(this::toResponse);
     }
+
 
     public Flux<CategoryResponse> getCategoriesByUserIdAndType(Integer userId, String type) {
         return categoriesRepository.findByUserIdAndType(userId, type)
@@ -61,10 +59,7 @@ public class CategoriesService {
         return new CategoryResponse(
                 entity.getId(),
                 entity.getName(),
-                entity.getBudgeted(),
-                entity.getPercentSpent(),
-                entity.getUserId(),
-                entity.getType().name()
+                entity.getBudgeted()
         );
     }
 }

@@ -25,4 +25,13 @@ public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEnt
     Mono<CategoryEntity> findByIdAndUserId(Long id, Long userId);
     @Query("SELECT * FROM categories WHERE user_id = :userId AND type = CAST(:type AS category_type_enum)")
     Flux<CategoryEntity> findByUserIdAndType(Integer userId, String type);
+
+
+    @Query("""
+        INSERT INTO categories (name, budgeted, percent_spent, user_id, type)
+        VALUES ($1, $2, $3, $4, CAST($5 AS category_type_enum))
+        RETURNING *
+    """)
+    Mono<CategoryEntity> insertCategory(String name, Integer budgeted, Double percentSpent, Integer userId, String type);
+
 }

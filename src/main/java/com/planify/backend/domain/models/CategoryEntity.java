@@ -25,5 +25,5 @@ public class CategoryEntity {
     @Column("user_id")
     private Integer userId;
 
-    private CategoryType type; // 👈 enum en vez de String
+    private CategoryType type;
 }
