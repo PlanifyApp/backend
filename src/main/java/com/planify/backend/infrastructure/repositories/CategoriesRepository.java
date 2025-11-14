@@ -20,7 +20,6 @@ public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEnt
     RETURNING *
 """)
     Mono<CategoryEntity> updateWithEnumCast(Long id, String name, Integer budgeted, Double percentSpent, Integer userId, String type);
-    Mono<CategoryEntity> findByName(String name);
     Flux<CategoryEntity> findByUserId(Integer userId);
     Mono<CategoryEntity> findByIdAndUserId(Long id, Long userId);
     @Query("SELECT * FROM categories WHERE user_id = :userId AND type = CAST(:type AS category_type_enum)")
