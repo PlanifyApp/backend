@@ -1,7 +1,6 @@
 package com.planify.backend.application.use_cases;
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
-import com.planify.backend.domain.enums.CategoryType;
 import com.planify.backend.domain.models.CategoryEntity;
 import com.planify.backend.infrastructure.repositories.CategoriesRepository;
 import org.springframework.stereotype.Service;

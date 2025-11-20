@@ -5,7 +5,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.data.relational.core.mapping.Column;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 @Data
@@ -13,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @Table("savings")
-public class Saving {
+public class SavingEntity {
 
     @Id
     private Long id;
@@ -30,21 +29,12 @@ public class Saving {
     @Column("initial_balance")
     private Integer initialBalance;
 
-    @Column("monthly_budget")
-    private Integer monthlyBudget;
-
-    @Column("total_saved")
-    private Integer totalSaved;
-
-    @Column("remaining")
-    private Integer remaining;
+    @Column("expected_deposit")
+    private Integer expectedDeposit;
 
     @Column("target_date")
     private LocalDate targetDate;
 
-    @Column("average")
-    private Integer average;
-
-    @Column("created_at")
-    private LocalDateTime createdAt;
+    @Column("icon")
+    private String icon;
 }
