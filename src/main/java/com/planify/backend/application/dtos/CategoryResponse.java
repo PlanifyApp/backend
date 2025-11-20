@@ -11,7 +11,4 @@ public class CategoryResponse {
     private Long id;
     private String name;
     private Integer budgeted;
-    private Double percentSpent;
-    private Integer userId;
-    private String type;
 }

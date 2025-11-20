@@ -2,7 +2,6 @@ package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
-import com.planify.backend.application.dtos.CategoryStatsResponse;
 import com.planify.backend.application.use_cases.CategoriesService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
