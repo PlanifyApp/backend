@@ -14,4 +14,5 @@ public class UserFinancialOverviewDTO {
     private List<CategoryEntity> incomes;
     private List<CategoryEntity> expenses;
     private List<SavingEntity> savings;
+    private List<DebtResponseDTO> debts;
 }
