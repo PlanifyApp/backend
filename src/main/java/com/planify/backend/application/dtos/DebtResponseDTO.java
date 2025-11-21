@@ -16,4 +16,5 @@ public class DebtResponseDTO {
     private Integer minimumPayment;
     private LocalDate dueDate;
     private String icon;
+    private Integer remainingDebt;
 }
