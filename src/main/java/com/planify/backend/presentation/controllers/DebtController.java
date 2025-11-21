@@ -25,6 +25,12 @@ public class DebtController {
         return debtService.getDebtsByUserId(userId);
     }
 
+    // NUEVO endpoint
+    @GetMapping("/user/{userId}/sum")
+    public Mono<Integer> getTotalDebt(@PathVariable Long userId) {
+        return debtService.getTotalDebtByUserId(userId);
+    }
+
     @PutMapping("/{id}")
     public Mono<DebtResponseDTO> updateDebt(
             @PathVariable Long id,
@@ -38,3 +44,4 @@ public class DebtController {
         return debtService.deleteDebt(id);
     }
 }
+
