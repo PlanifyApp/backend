@@ -2,6 +2,7 @@ package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
+import com.planify.backend.application.dtos.CategorySimpleResponse;
 import com.planify.backend.application.use_cases.CategoriesService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -25,6 +26,11 @@ public class CategoriesController {
     @PostMapping
     public Mono<CategoryResponse> create(@RequestBody CategoryRequest request) {
         return categoriesService.createCategory(request);
+    }
+
+    @GetMapping("/user/{userId}/names")
+    public Flux<CategorySimpleResponse> getCategoryNames(@PathVariable Integer userId) {
+        return categoriesService.getCategoryNamesByUserId(userId);
     }
 
     @PutMapping("/{id}")

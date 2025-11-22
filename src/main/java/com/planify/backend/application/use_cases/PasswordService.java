@@ -38,7 +38,7 @@ public class PasswordService {
                     return tokenRepository.save(tokenEntity)
                             .flatMap(savedToken -> {
                                 // Enviar email con link de reseteo
-                                String resetLink = baseUrl + "/reset-password?token=" + token;
+                                String resetLink = baseUrl + "/forgetPassword?token=" + token;
                                 return emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
                             });
                 });
