@@ -1,6 +1,7 @@
 package com.planify.backend.application.use_cases;
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
+import com.planify.backend.application.dtos.CategorySimpleResponse;
 import com.planify.backend.domain.models.CategoryEntity;
 import com.planify.backend.infrastructure.repositories.CategoriesRepository;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,11 @@ public class CategoriesService {
     public Flux<CategoryResponse> getCategoriesByUserId(Integer userId) {
         return categoriesRepository.findByUserId(userId)
                 .map(this::toResponse);
+    }
+
+    public Flux<CategorySimpleResponse> getCategoryNamesByUserId(Integer userId) {
+        return categoriesRepository.findByUserId(userId)
+                .map(entity -> new CategorySimpleResponse(entity.getId(), entity.getName()));
     }
 
     public Mono<CategoryResponse> createCategory(CategoryRequest request) {

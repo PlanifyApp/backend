@@ -2,6 +2,7 @@ package com.planify.backend.application.use_cases;
 
 import com.planify.backend.application.dtos.AccountsCreateDTO;
 import com.planify.backend.application.dtos.AccountsResponseDTO;
+import com.planify.backend.application.dtos.AccountsSimpleResponseDTO;
 import com.planify.backend.application.dtos.AccountsUpdateDTO;
 import com.planify.backend.domain.models.AccountsEntity;
 import com.planify.backend.infrastructure.repositories.AccountsRepository;
@@ -23,6 +24,11 @@ public class AccountsService {
         return accountsRepository.findAll()
                 .map(this::mapToResponse);
     }
+    public Flux<AccountsSimpleResponseDTO> getAccountsNamesByUserId(Long userId) {
+        return accountsRepository.findAllByUserId(userId)
+                .map(entity -> new AccountsSimpleResponseDTO(entity.getId(), entity.getName()));
+    }
+
 
     public Mono<AccountsResponseDTO> getAccountById(Long id) {
         return accountsRepository.findById(id)

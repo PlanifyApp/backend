@@ -2,6 +2,7 @@ package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.AccountsCreateDTO;
 import com.planify.backend.application.dtos.AccountsResponseDTO;
+import com.planify.backend.application.dtos.AccountsSimpleResponseDTO;
 import com.planify.backend.application.dtos.AccountsUpdateDTO;
 import com.planify.backend.application.use_cases.AccountsService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,13 @@ public class AccountsController {
         log.info("Fetching all accounts");
         return accountsService.getAllAccounts();
     }
+
+    @GetMapping("/user/{userId}/names")
+    public Flux<AccountsSimpleResponseDTO> getAccountsNamesByUser(@PathVariable Long userId) {
+        log.info("Fetching account names for user id: {}", userId);
+        return accountsService.getAccountsNamesByUserId(userId);
+    }
+
 
     @GetMapping("/{id}")
     public Mono<ResponseEntity<AccountsResponseDTO>> getAccountById(@PathVariable Long id) {
