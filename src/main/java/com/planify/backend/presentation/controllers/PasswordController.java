@@ -17,7 +17,7 @@ public class PasswordController {
 
     @PostMapping("/forgot-password")
     public Mono<ResponseEntity<String>> forgotPassword(@RequestBody ForgotPasswordRequestDTO request) {
-        String baseUrl = "https://planify.app"; // URL del frontend
+        String baseUrl = "http://localhost:8080"; // URL del frontend
 
         return passwordService.requestPasswordReset(request.getEmail(), baseUrl)
                 .thenReturn(ResponseEntity.ok("Si el correo existe, te enviamos un enlace para restablecer la contraseña"))
