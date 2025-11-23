@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountsCreateDTO {
-    private Long wallet_id;
     private String name;
     private Long quota;
     private Long budgeted;

@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class CategoryRequest {
     private String name;
     private Integer budgeted;
-    private Double percentSpent;
     private Integer userId;
     private String type;
 }
