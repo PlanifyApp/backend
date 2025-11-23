@@ -44,7 +44,6 @@ public class AccountsService {
 
     public Mono<AccountsResponseDTO> createAccount(AccountsCreateDTO dto) {
         AccountsEntity entity = new AccountsEntity();
-        entity.setWalletId(dto.getWallet_id());
         entity.setName(dto.getName());
         entity.setQuota(dto.getQuota());
         entity.setBudgeted(dto.getBudgeted());

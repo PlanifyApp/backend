@@ -2,6 +2,7 @@ package com.planify.backend.application.use_cases;
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
 import com.planify.backend.application.dtos.CategorySimpleResponse;
+import com.planify.backend.domain.enums.CategoryType;
 import com.planify.backend.domain.models.CategoryEntity;
 import com.planify.backend.infrastructure.repositories.CategoriesRepository;
 import org.springframework.stereotype.Service;
@@ -31,12 +32,10 @@ public class CategoriesService {
         return categoriesRepository.insertCategory(
                 request.getName(),
                 request.getBudgeted(),
-                request.getPercentSpent(),
                 request.getUserId(),
                 request.getType().trim().toLowerCase()
         ).map(this::toResponse);
     }
-
 
     public Flux<CategoryResponse> getCategoriesByUserIdAndType(Integer userId, String type) {
         return categoriesRepository.findByUserIdAndType(userId, type)
@@ -49,8 +48,8 @@ public class CategoriesService {
                 .flatMap(existing -> {
                     existing.setName(request.getName());
                     existing.setBudgeted(request.getBudgeted());
-                    existing.setPercentSpent(request.getPercentSpent());
                     existing.setUserId(request.getUserId());
+                    existing.setType(CategoryType.fromString(request.getType()));
                     return categoriesRepository.save(existing);
                 })
                 .map(this::toResponse);
@@ -68,4 +67,5 @@ public class CategoriesService {
         );
     }
 }
+
 

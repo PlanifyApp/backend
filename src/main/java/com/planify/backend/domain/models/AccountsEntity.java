@@ -18,9 +18,6 @@ public class AccountsEntity {
     @Id
     private Long id;
 
-    @Column("wallet_id")
-    private Long walletId;
-
     @Column("name")
     private String name;
 
