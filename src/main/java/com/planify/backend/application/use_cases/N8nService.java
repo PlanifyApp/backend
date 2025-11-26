@@ -28,7 +28,6 @@ public class N8nService {
                         category.getId(),
                         category.getName(),
                         category.getBudgeted(),
-                        0.0,
                         userId.intValue(),
                         CategoryType.income
                 ))
@@ -41,7 +40,6 @@ public class N8nService {
                         category.getId(),
                         category.getName(),
                         category.getBudgeted(),
-                        0.0,
                         userId.intValue(),
                         CategoryType.expense
                 ))

@@ -3,6 +3,7 @@ package com.planify.backend.infrastructure.repositories;
 import com.planify.backend.domain.models.Transaction;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
@@ -35,4 +36,26 @@ public interface TransactionsRepository extends ReactiveCrudRepository<Transacti
 
     // ✅ Record interno para mapear correctamente con los alias SQL
     public record UserBalanceProjection(Long total_ingresos, Long total_gastos) {}
+
+
+    @Query("""
+    SELECT date_time, description, amount
+    FROM transactions
+    WHERE user_id = $1
+      AND ($2::text IS NULL OR type = $2::transaction_type_enum)
+      AND ($3::timestamp IS NULL OR date_time >= $3)
+      AND ($4::timestamp IS NULL OR date_time <= $4)
+    ORDER BY date_time DESC
+""")
+    Flux<TransactionSummaryProjection> findIncomeExpenseFiltered(
+            Integer userId,
+            String type,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+    public record TransactionSummaryProjection(
+            LocalDateTime date_time,
+            String description,
+            Integer amount
+    ) {}
 }
