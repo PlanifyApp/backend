@@ -3,6 +3,7 @@ package com.planify.backend.presentation.controllers;
 import com.planify.backend.application.dtos.CategoryRequest;
 import com.planify.backend.application.dtos.CategoryResponse;
 import com.planify.backend.application.dtos.CategorySimpleResponse;
+import com.planify.backend.application.dtos.TransactionCategoryAllDTO;
 import com.planify.backend.application.use_cases.CategoriesService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -50,4 +51,15 @@ public class CategoriesController {
     ) {
         return categoriesService.getCategoriesByUserIdAndType(userId, type);
     }
+
+    @GetMapping("/user/{userId}/transactions")
+    public Flux<TransactionCategoryAllDTO> getCategoryTransactions(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) String type,       // income / expense
+            @RequestParam(required = false) String startDate,  // YYYY-MM-DD
+            @RequestParam(required = false) String endDate
+    ) {
+        return categoriesService.getCategoryTransactions(userId, type, startDate, endDate);
+    }
+
 }

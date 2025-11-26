@@ -6,6 +6,8 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEntity, Long> {
 
     @Query("""
@@ -32,5 +34,41 @@ public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEnt
         RETURNING *
     """)
     Mono<CategoryEntity> insertCategory(String name, Integer budgeted, Integer userId, String type);
+
+
+    @Query("""
+    SELECT 
+        c.id AS category_id,
+        c.name AS category_name,
+        c.type AS category_type,
+        c.budgeted AS category_budgeted,
+        t.date_time AS date,
+        t.description AS description,
+        t.amount AS amount
+    FROM transactions t
+    JOIN categories c ON c.id = t.category_id
+    WHERE t.user_id = $1
+      AND ($2::text IS NULL OR c.type = $2::category_type_enum)
+      AND ($3::timestamp IS NULL OR t.date_time >= $3)
+      AND ($4::timestamp IS NULL OR t.date_time <= $4)
+    ORDER BY c.id, t.date_time DESC
+""")
+    Flux<TransactionCategoryProjection> findTransactionsByCategory(
+            Integer userId,
+            String type,
+            LocalDateTime startDate,
+            LocalDateTime endDate
+    );
+
+    public record TransactionCategoryProjection(
+            Long category_id,
+            String category_name,
+            String category_type,
+            Integer category_budgeted,
+            LocalDateTime date,
+            String description,
+            Integer amount
+    ) {}
+
 
 }
