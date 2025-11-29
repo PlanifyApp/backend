@@ -1,6 +1,7 @@
 package com.planify.backend.presentation.controllers;
 
 import com.planify.backend.application.dtos.TransactionDTO;
+import com.planify.backend.application.dtos.TransactionSummaryDTO;
 import com.planify.backend.application.use_cases.TransactionViewIncomeExpenseService;
 import com.planify.backend.application.use_cases.TransactionViewService;
 import com.planify.backend.application.use_cases.TransactionsService;
@@ -44,6 +45,17 @@ public class TransactionsController {
                         "createdAt", saved.getDateTime()
                 ));
     }
+
+    @GetMapping("/user/{userId}/summary")
+    public Flux<TransactionSummaryDTO> getIncomeExpenseSummary(
+            @PathVariable Integer userId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate
+    ) {
+        return transactionsService.getIncomeExpenseSummary(userId, type, startDate, endDate);
+    }
+
 
 
     @GetMapping("/balance/{userId}")
