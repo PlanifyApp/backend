@@ -55,11 +55,12 @@ public class CategoriesController {
     @GetMapping("/user/{userId}/transactions")
     public Flux<TransactionCategoryAllDTO> getCategoryTransactions(
             @PathVariable Integer userId,
-            @RequestParam(required = false) String type,       // income / expense
-            @RequestParam(required = false) String startDate,  // YYYY-MM-DD
-            @RequestParam(required = false) String endDate
+            @RequestParam(required = false) String type,        // income / expense
+            @RequestParam(required = false) String startDate,   // YYYY-MM-DD
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String description   // <-- NUEVO
     ) {
-        return categoriesService.getCategoryTransactions(userId, type, startDate, endDate);
+        return categoriesService.getCategoryTransactions(userId, type, startDate, endDate, description);
     }
 
 }

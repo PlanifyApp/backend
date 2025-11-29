@@ -74,7 +74,8 @@ public class CategoriesService {
             Integer userId,
             String type,
             String startDate,
-            String endDate
+            String endDate,
+            String description
     ) {
         LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate + "T00:00:00") : null;
         LocalDateTime end   = endDate != null ? LocalDateTime.parse(endDate + "T23:59:59") : null;
@@ -84,14 +85,18 @@ public class CategoriesService {
                 ? type.toLowerCase()
                 : null;
 
+        String descFilter = (description != null && !description.isBlank())
+                ? "%" + description.toLowerCase() + "%"   // para búsqueda parcial
+                : null;
+
         return categoriesRepository.findTransactionsByCategory(
-                        userId, normalizedType, start, end
+                        userId, normalizedType, start, end, descFilter
                 )
                 .map(t -> new TransactionCategoryAllDTO(
                         t.category_id(),
                         t.category_name(),
                         t.category_type(),
-                        t.category_budgeted(),  // null si es income
+                        t.category_budgeted(),
                         t.date(),
                         t.description(),
                         t.amount()

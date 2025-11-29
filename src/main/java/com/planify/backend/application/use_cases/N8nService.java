@@ -2,9 +2,12 @@ package com.planify.backend.application.use_cases;
 
 import com.planify.backend.application.dtos.UserFinancialOverviewDTO;
 import com.planify.backend.application.dtos.DebtResponseDTO;
+import com.planify.backend.application.dtos.UserIdResponseDTO;
 import com.planify.backend.domain.enums.CategoryType;
 import com.planify.backend.domain.models.CategoryEntity;
 import com.planify.backend.domain.models.SavingEntity;
+import com.planify.backend.domain.models.UsersEntity;
+import com.planify.backend.infrastructure.repositories.UsersRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -18,6 +21,7 @@ public class N8nService {
     private final CategoriesService categoriesService;
     private final SavingsService savingsService;
     private final DebtService debtService;
+    private final UsersRepository usersRepository;
 
     public Mono<UserFinancialOverviewDTO> getUserFinancialData(Long userId) {
 
@@ -63,4 +67,10 @@ public class N8nService {
                         tuple.getT4()  // debts 👈
                 ));
     }
+    public Mono<UserIdResponseDTO> getUserIdByEmail(String email) {
+        return usersRepository.findByEmail(email)
+                .map(user -> new UserIdResponseDTO(user.getId()))
+                .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
+    }
+
 }

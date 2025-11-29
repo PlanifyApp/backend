@@ -51,13 +51,15 @@ public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEnt
       AND ($2::text IS NULL OR c.type = $2::category_type_enum)
       AND ($3::timestamp IS NULL OR t.date_time >= $3)
       AND ($4::timestamp IS NULL OR t.date_time <= $4)
+      AND ($5::text IS NULL OR LOWER(t.description) LIKE LOWER($5))
     ORDER BY c.id, t.date_time DESC
 """)
     Flux<TransactionCategoryProjection> findTransactionsByCategory(
             Integer userId,
             String type,
             LocalDateTime startDate,
-            LocalDateTime endDate
+            LocalDateTime endDate,
+            String description   // <-- NUEVO
     );
 
     public record TransactionCategoryProjection(
