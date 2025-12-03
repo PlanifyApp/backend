@@ -2,12 +2,110 @@ package com.planify.backend.infrastructure.repositories;
 
 import com.planify.backend.domain.models.Transaction;
 import org.springframework.data.r2dbc.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface TransactionsRepository extends ReactiveCrudRepository<Transaction, Long> {
+
+    // 1. Total Ingresos
+    @Query("""
+            SELECT COALESCE(SUM(amount), 0)
+            FROM transactions
+            WHERE user_id = :userId
+              AND type = 'income'
+            """)
+    Mono<BigDecimal> getTotalIncome(Long userId);
+
+    // 2. Total Gastos
+    @Query("""
+            SELECT COALESCE(SUM(amount), 0)
+            FROM transactions
+            WHERE user_id = :userId
+              AND type = 'expense'
+            """)
+    Mono<BigDecimal> getTotalExpenses(Long userId);
+
+    // 3. Total (ingresos - gastos)
+    @Query("""
+            SELECT
+                (SELECT COALESCE(SUM(amount),0) FROM transactions WHERE user_id=:userId AND type='income')
+              - (SELECT COALESCE(SUM(amount),0) FROM transactions WHERE user_id=:userId AND type='expense')
+            """)
+    Mono<BigDecimal> getTotal(Long userId);
+
+    // ============================
+    // INTERFACES DE PROYECCIÓN (SOLO UNA VEZ)
+    // ============================
+
+    // 4. Gráfico ingresos vs gastos por día
+    public interface IncomeExpenseByDayProjection {
+        LocalDate getDate();
+        String getDay();
+        Integer getIncome();
+        Integer getExpense();
+    }
+
+    // 5. Gráfico ahorro vs deuda
+    public interface SavingDebtByDayProjection {
+        String getDay();
+        Integer getSaving();  // Usa Integer
+        Integer getDebt();
+    }
+
+    // ============================
+    // CONSULTAS CON PROYECCIONES
+    // ============================
+
+
+    // 8. Total general
+    @Query("""
+            SELECT SUM(amount)
+            FROM transactions
+            WHERE user_id = :userId
+            """)
+    Mono<BigDecimal> getTotalGeneral(Long userId);
+
+    // 9. Total anual
+    @Query("""
+            SELECT SUM(amount)
+            FROM transactions
+            WHERE user_id = :userId
+              AND EXTRACT(YEAR FROM date_time) = EXTRACT(YEAR FROM CURRENT_DATE)
+            """)
+    Mono<BigDecimal> getTotalYear(Long userId);
+
+    // 10. Total mensual
+    @Query("""
+            SELECT SUM(amount)
+            FROM transactions
+            WHERE user_id = :userId
+              AND date_time >= date_trunc('month', CURRENT_DATE)
+              AND date_time < date_trunc('month', CURRENT_DATE) + INTERVAL '1 month'
+            """)
+    Mono<BigDecimal> getTotalMonth(Long userId);
+
+    // 11. Promedio diario del mes actual
+    @Query("""
+            SELECT AVG(daily_sum)
+            FROM (
+                  SELECT date(date_time) AS date, SUM(amount) AS daily_sum
+                  FROM transactions
+                  WHERE user_id = :userId
+                    AND date_time >= date_trunc('month', CURRENT_DATE)
+                  GROUP BY 1
+            ) sub
+            """)
+    Mono<BigDecimal> getDailyAverage(Long userId);
+
+    // ============================
+    // OTRAS CONSULTAS (mantenerlas)
+    // ============================
 
     @Query("""
         INSERT INTO transactions (user_id, account_id, category_id, type, description, amount, date_time, note)
@@ -34,9 +132,7 @@ public interface TransactionsRepository extends ReactiveCrudRepository<Transacti
         """)
     Mono<UserBalanceProjection> getUserBalance(Integer userId);
 
-    // ✅ Record interno para mapear correctamente con los alias SQL
     public record UserBalanceProjection(Long total_ingresos, Long total_gastos) {}
-
 
     @Query("""
     SELECT date_time, description, amount
