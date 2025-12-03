@@ -32,13 +32,13 @@ public class DebtController {
     @GetMapping("/user/{userId}/filter")
     public Flux<DebtResponseWithDescriptionDTO> filterDebts(
             @PathVariable Long userId,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String description,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate
     ) {
         LocalDate start = startDate != null ? LocalDate.parse(startDate) : null;
         LocalDate end= endDate != null ? LocalDate.parse(endDate) : null;
-        return debtService.searchDebts(userId, search, start, end);
+        return debtService.searchDebts(userId, description, start, end);
     }
 
     // NUEVO endpoint

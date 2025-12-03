@@ -27,13 +27,13 @@ public class SavingsController {
     @GetMapping("/user/{userId}/filter")
     public Flux<SavingResponseDTO> filterSavings(
             @PathVariable Long userId,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String description,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate
     ) {
         LocalDate start = startDate != null ? LocalDate.parse(startDate) : null;
         LocalDate end = endDate != null ? LocalDate.parse(endDate) : null;
-        return savingsService.searchSavingsDTO(userId, search, start, end);
+        return savingsService.searchSavingsDTO(userId, description, start, end);
     }
 
 
