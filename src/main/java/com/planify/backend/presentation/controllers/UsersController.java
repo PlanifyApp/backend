@@ -93,26 +93,18 @@ public class UsersController {
                 });
     }
 
-
-
-
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Object>> deleteUser(@PathVariable Integer id) {
-        log.info("🗑️ [DELETE] Deleting user with ID: {}", id);
-        return usersService.deleteUser(id)
-                .then(Mono.just(ResponseEntity.noContent().build()))
-                .onErrorResume(error -> {
-                    log.error("❌ Error deleting user {}: {}", id, error.getMessage(), error);
-                    String message = error.getMessage().contains("no encontrado")
-                            ? "Usuario no encontrado"
-                            : "Error interno al eliminar usuario";
-                    HttpStatus status = message.equals("Usuario no encontrado")
-                            ? HttpStatus.NOT_FOUND
-                            : HttpStatus.INTERNAL_SERVER_ERROR;
-                    return Mono.just(ResponseEntity.status(status)
-                            .body((Object) new ErrorResponse(message, error.getMessage())));
-                });
+    public Mono<ResponseEntity<MessageResponse>> delete(@PathVariable Long id) {
+        return usersService.deleteUser(id.intValue())
+                .then(Mono.just(ResponseEntity.ok(
+                        new MessageResponse("User deleted successfully")
+                )));
     }
+
+    record MessageResponse(String message) {}
+
+
+
 
     record ErrorResponse(String message, String details) {}
 }
