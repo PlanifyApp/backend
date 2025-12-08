@@ -1,4 +1,5 @@
 package com.planify.backend.application.use_cases;
+import com.planify.backend.application.dtos.CategoryBudgetWithTotalResponse;
 import com.planify.backend.domain.models.DebtByDay;
 import com.planify.backend.domain.models.IncomeExpenseByDay;
 import com.planify.backend.domain.models.SavingDebtByDay;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,12 +31,12 @@ public class StatsService {
     // ============================
     // MÉTRICAS SIMPLES
     // ============================
-    public Mono<BigDecimal> getTotalIncome(Long userId) {
-        return transactionsRepository.getTotalIncome(userId);
+    public Mono<BigDecimal> getTotalIncome(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
+        return transactionsRepository.getTotalIncomeInRange(userId, startDate, endDate);
     }
 
-    public Mono<BigDecimal> getTotalExpenses(Long userId) {
-        return transactionsRepository.getTotalExpenses(userId);
+    public Mono<BigDecimal> getTotalExpenses(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
+        return transactionsRepository.getTotalExpensesInRange(userId, startDate, endDate);
     }
 
     public Mono<BigDecimal> getTotalBudget(Long userId) {
@@ -45,8 +47,8 @@ public class StatsService {
         return transactionsRepository.getTotal(userId);
     }
 
-    public Mono<BigDecimal> getTotalGeneral(Long userId) {
-        return transactionsRepository.getTotalGeneral(userId);
+    public Mono<BigDecimal> getTotalGeneral(Long userId, LocalDateTime startDate, LocalDateTime endDate) {
+        return transactionsRepository.getTotalGeneralInRange(userId, startDate, endDate);
     }
 
     public Mono<BigDecimal> getTotalYear(Long userId) {
@@ -64,6 +66,41 @@ public class StatsService {
     public Mono<BigDecimal> getTotalDebt(Long userId) {
         return debtRepository.getTotalDebt(userId);
     }
+
+    public Mono<DailyIncomeExpense> getDailyIncomeAndExpense(Long userId, LocalDateTime start, LocalDateTime end) {
+
+        Mono<BigDecimal> incomeMono = transactionsRepository.getTotalIncomeInRange(userId, start, end);
+        Mono<BigDecimal> expenseMono = transactionsRepository.getTotalExpensesInRange(userId, start, end);
+
+        return Mono.zip(incomeMono, expenseMono, (income, expense) ->
+                new DailyIncomeExpense(income, expense)
+        );
+    }
+
+    public record DailyIncomeExpense(
+            BigDecimal income,
+            BigDecimal expense
+    ) {}
+
+    public Mono<CategoryBudgetWithTotalResponse> getBudgetByCategoryWithTotal(Long userId) {
+        return categoriesRepository.findByUserId(userId.intValue())
+                .collectList()
+                .flatMap(categories -> {
+                    List<CategoryBudgetWithTotalResponse.CategoryBudgetItem> items = categories.stream()
+                            .map(cat -> new CategoryBudgetWithTotalResponse.CategoryBudgetItem(
+                                    cat.getName(),  // Usar getName() directamente de la entidad
+                                    BigDecimal.valueOf(cat.getBudgeted())
+                            ))
+                            .collect(Collectors.toList());
+
+                    BigDecimal total = categories.stream()
+                            .map(cat -> BigDecimal.valueOf(cat.getBudgeted()))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    return Mono.just(new CategoryBudgetWithTotalResponse(items, total));
+                });
+    }
+
 
     public Flux<DebtByDay> getDebtByDay(Long userId) {
         return debtByDayRepository.findByUser(userId);
@@ -114,33 +151,33 @@ public class StatsService {
     // ============================
     // AGRUPAR TODAS LAS MÉTRICAS
     // ============================
-    public Mono<StatsSummary> getFullStats(Long userId) {
-
-        List<Mono<BigDecimal>> monos = Arrays.asList(
-                getTotalIncome(userId),
-                getTotalExpenses(userId),
-                getTotalBudget(userId),
-                getTotal(userId),
-                getTotalGeneral(userId),
-                getTotalYear(userId),
-                getTotalMonth(userId),
-                getDailyAverage(userId),
-                getTotalDebt(userId)
-        );
-
-        return Mono.zip(monos, tuple -> new StatsSummary(
-                (BigDecimal) tuple[0],
-                (BigDecimal) tuple[1],
-                (BigDecimal) tuple[2],
-                (BigDecimal) tuple[3],
-                (BigDecimal) tuple[4],
-                (BigDecimal) tuple[5],
-                (BigDecimal) tuple[6],
-                (BigDecimal) tuple[7],
-                (BigDecimal) tuple[8],
-                (BigDecimal) tuple[9]
-        ));
-    }
+//    public Mono<StatsSummary> getFullStats(Long userId) {
+//
+//        List<Mono<BigDecimal>> monos = Arrays.asList(
+//                getTotalIncome(userId),
+//                getTotalExpenses(userId),
+//                getTotalBudget(userId),
+//                getTotal(userId),
+//                getTotalGeneral(userId),
+//                getTotalYear(userId),
+//                getTotalMonth(userId),
+//                getDailyAverage(userId),
+//                getTotalDebt(userId)
+//        );
+//
+//        return Mono.zip(monos, tuple -> new StatsSummary(
+//                (BigDecimal) tuple[0],
+//                (BigDecimal) tuple[1],
+//                (BigDecimal) tuple[2],
+//                (BigDecimal) tuple[3],
+//                (BigDecimal) tuple[4],
+//                (BigDecimal) tuple[5],
+//                (BigDecimal) tuple[6],
+//                (BigDecimal) tuple[7],
+//                (BigDecimal) tuple[8],
+//                (BigDecimal) tuple[9]
+//        ));
+//    }
 
     // ===================================================
     // DTO DE SALIDA (para evitar modelar 20 clases)

@@ -1,9 +1,10 @@
 package com.planify.backend.presentation.controllers;
 
+import com.planify.backend.application.dtos.CategoryBudgetWithTotalResponse;
+import com.planify.backend.application.dtos.DailyIncomeExpenseResponse;
 import com.planify.backend.application.use_cases.StatsService;
 import com.planify.backend.domain.models.IncomeExpenseByDay;
 import com.planify.backend.domain.models.SavingDebtByDay;
-import com.planify.backend.infrastructure.repositories.TransactionsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -25,15 +26,49 @@ public class StatsController {
     // ============================
 
     @GetMapping("/{userId}/total-income")
-    public Mono<Object> getTotalIncome(@PathVariable Long userId) {
-        return statsService.getTotalIncome(userId)
+    public Mono<Object> getTotalIncome(
+            @PathVariable Long userId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59);
+
+        return statsService.getTotalIncome(userId, start, end)
                 .map(total -> new Response("Total ingresos", total));
     }
 
     @GetMapping("/{userId}/total-expenses")
-    public Mono<Object> getTotalExpenses(@PathVariable Long userId) {
-        return statsService.getTotalExpenses(userId)
+    public Mono<Object> getTotalExpenses(
+            @PathVariable Long userId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59);
+
+        return statsService.getTotalExpenses(userId, start, end)
                 .map(total -> new Response("Total gastos", total));
+    }
+
+    @GetMapping("/{userId}/daily-income-expense")
+    public Mono<Object> getDailyIncomeAndExpense(
+            @PathVariable Long userId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(23, 59, 59);
+
+        return statsService.getDailyIncomeAndExpense(userId, start, end)
+                .map(result -> new DailyIncomeExpenseResponse(
+                        result.income(),
+                        result.expense()
+                ));
+    }
+
+    @GetMapping("/{userId}/budget-by-category-with-total")
+    public Mono<CategoryBudgetWithTotalResponse> getBudgetByCategoryWithTotal(@PathVariable Long userId) {
+        return statsService.getBudgetByCategoryWithTotal(userId);
     }
 
     @GetMapping("/{userId}/total-budget")
@@ -49,8 +84,15 @@ public class StatsController {
     }
 
     @GetMapping("/{userId}/total-general")
-    public Mono<Object> getTotalGeneral(@PathVariable Long userId) {
-        return statsService.getTotalGeneral(userId)
+    public Mono<Object> getTotalGeneral(
+            @PathVariable Long userId,
+            @RequestParam LocalDate startDate,
+            @RequestParam LocalDate endDate
+    ) {
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.atTime(23, 59, 59);
+
+        return statsService.getTotalGeneral(userId, start, end)
                 .map(total -> new Response("Total general", total));
     }
 
@@ -110,7 +152,7 @@ public class StatsController {
     // ENDPOINTS PARA GRÁFICOS/TABLAS
     // ============================
 
-    @GetMapping("/{userId}/income-vs-expenses-by-day")
+    @GetMapping("/{userId}/income-vs-expenses")
     public Flux<Object> getIncomeVsExpensesByDay(
             @PathVariable Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -131,7 +173,7 @@ public class StatsController {
     }
 
 
-    @GetMapping("/{userId}/saving-vs-debt-by-day")
+    @GetMapping("/{userId}/saving-vs-debt")
     public Flux<Object> getSavingVsDebtByDay(
             @PathVariable Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
@@ -195,11 +237,11 @@ public class StatsController {
     // ENDPOINT PARA TODAS LAS MÉTRICAS
     // ============================
 
-    @GetMapping("/{userId}/full")
-    public Mono<Object> getFullStats(@PathVariable Long userId) {
-        return statsService.getFullStats(userId)
-                .map(statsSummary -> statsSummary);
-    }
+//    @GetMapping("/{userId}/full")
+//    public Mono<Object> getFullStats(@PathVariable Long userId) {
+//        return statsService.getFullStats(userId)
+//                .map(statsSummary -> statsSummary);
+//    }
 
     // ============================
     // DTOs DE RESPUESTA

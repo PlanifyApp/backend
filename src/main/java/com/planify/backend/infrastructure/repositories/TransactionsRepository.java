@@ -15,21 +15,23 @@ public interface TransactionsRepository extends ReactiveCrudRepository<Transacti
 
     // 1. Total Ingresos
     @Query("""
-            SELECT COALESCE(SUM(amount), 0)
-            FROM transactions
-            WHERE user_id = :userId
-              AND type = 'income'
-            """)
-    Mono<BigDecimal> getTotalIncome(Long userId);
+        SELECT COALESCE(SUM(amount), 0)
+        FROM transactions
+        WHERE user_id = :userId
+          AND type = 'income'
+          AND date_time BETWEEN :startDate AND :endDate
+        """)
+    Mono<BigDecimal> getTotalIncomeInRange(Long userId, LocalDateTime startDate, LocalDateTime endDate);
 
     // 2. Total Gastos
     @Query("""
-            SELECT COALESCE(SUM(amount), 0)
-            FROM transactions
-            WHERE user_id = :userId
-              AND type = 'expense'
-            """)
-    Mono<BigDecimal> getTotalExpenses(Long userId);
+        SELECT COALESCE(SUM(amount), 0)
+        FROM transactions
+        WHERE user_id = :userId
+          AND type = 'expense'
+          AND date_time BETWEEN :startDate AND :endDate
+        """)
+    Mono<BigDecimal> getTotalExpensesInRange(Long userId, LocalDateTime startDate, LocalDateTime endDate);
 
     // 3. Total (ingresos - gastos)
     @Query("""
@@ -65,11 +67,12 @@ public interface TransactionsRepository extends ReactiveCrudRepository<Transacti
 
     // 8. Total general
     @Query("""
-            SELECT SUM(amount)
-            FROM transactions
-            WHERE user_id = :userId
-            """)
-    Mono<BigDecimal> getTotalGeneral(Long userId);
+        SELECT COALESCE(SUM(amount), 0)
+        FROM transactions
+        WHERE user_id = :userId
+          AND date_time BETWEEN :startDate AND :endDate
+        """)
+    Mono<BigDecimal> getTotalGeneralInRange(Long userId, LocalDateTime startDate, LocalDateTime endDate);
 
     // 9. Total anual
     @Query("""
