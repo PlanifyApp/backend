@@ -67,8 +67,11 @@ public class StatsController {
     }
 
     @GetMapping("/{userId}/budget-by-category-with-total")
-    public Mono<CategoryBudgetWithTotalResponse> getBudgetByCategoryWithTotal(@PathVariable Long userId) {
-        return statsService.getBudgetByCategoryWithTotal(userId);
+    public Mono<CategoryBudgetWithTotalResponse> getBudgetByCategoryWithTotal(
+            @PathVariable Long userId,
+            @RequestParam(required = false) String type  // Parámetro opcional: "income", "expense", o null para todos
+    ) {
+        return statsService.getBudgetByCategoryWithTotal(userId, type);
     }
 
     @GetMapping("/{userId}/total-budget")

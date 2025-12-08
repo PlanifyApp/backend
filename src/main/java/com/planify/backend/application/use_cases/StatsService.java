@@ -1,5 +1,6 @@
 package com.planify.backend.application.use_cases;
 import com.planify.backend.application.dtos.CategoryBudgetWithTotalResponse;
+import com.planify.backend.domain.models.CategoryEntity;
 import com.planify.backend.domain.models.DebtByDay;
 import com.planify.backend.domain.models.IncomeExpenseByDay;
 import com.planify.backend.domain.models.SavingDebtByDay;
@@ -82,13 +83,24 @@ public class StatsService {
             BigDecimal expense
     ) {}
 
-    public Mono<CategoryBudgetWithTotalResponse> getBudgetByCategoryWithTotal(Long userId) {
-        return categoriesRepository.findByUserId(userId.intValue())
+    public Mono<CategoryBudgetWithTotalResponse> getBudgetByCategoryWithTotal(Long userId, String type) {
+        Flux<CategoryEntity> categoriesFlux;
+
+        // Determinar qué método del repositorio usar según el tipo
+        if (type == null || type.isEmpty() || type.equalsIgnoreCase("all")) {
+            // Si no se especifica tipo o es "all", obtener todas las categorías
+            categoriesFlux = categoriesRepository.findByUserId(userId.intValue());
+        } else {
+            // Filtrar por tipo específico (income o expense)
+            categoriesFlux = categoriesRepository.findByUserIdAndType(userId.intValue(), type);
+        }
+
+        return categoriesFlux
                 .collectList()
                 .flatMap(categories -> {
                     List<CategoryBudgetWithTotalResponse.CategoryBudgetItem> items = categories.stream()
                             .map(cat -> new CategoryBudgetWithTotalResponse.CategoryBudgetItem(
-                                    cat.getName(),  // Usar getName() directamente de la entidad
+                                    cat.getName(),
                                     BigDecimal.valueOf(cat.getBudgeted())
                             ))
                             .collect(Collectors.toList());
