@@ -1,6 +1,7 @@
 package com.planify.backend.application.use_cases;
 
 import com.planify.backend.application.dtos.TransactionDTO;
+import com.planify.backend.application.dtos.TransactionSummaryDTO;
 import com.planify.backend.domain.enums.CategoryType;
 import com.planify.backend.domain.models.Transaction;
 import com.planify.backend.infrastructure.repositories.AccountsRepository;
@@ -10,8 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -67,7 +70,6 @@ public class TransactionsService {
                                             category.getId(),
                                             category.getName(),
                                             category.getBudgeted(),
-                                            category.getPercentSpent(),
                                             category.getUserId(),
                                             category.getType().name().toLowerCase()
                                     ).thenReturn(savedTx); // devolvemos la transacción
@@ -89,4 +91,29 @@ public class TransactionsService {
                     );
                 });
     }
+
+    public Flux<TransactionSummaryDTO> getIncomeExpenseSummary(
+            Integer userId,
+            String type,
+            String startDate,
+            String endDate
+    ) {
+        LocalDateTime start = startDate != null ? LocalDateTime.parse(startDate + "T00:00:00") : null;
+        LocalDateTime end   = endDate != null ? LocalDateTime.parse(endDate + "T23:59:59") : null;
+
+        // Si type no es income o expense → lo tratamos como null (trae ambos)
+        String normalizedType = (type != null &&
+                (type.equalsIgnoreCase("income") || type.equalsIgnoreCase("expense")))
+                ? type.toLowerCase()
+                : null;
+
+        return transactionsRepository.findIncomeExpenseFiltered(userId, normalizedType, start, end)
+                .map(t -> new TransactionSummaryDTO(
+                        t.date_time(),
+                        t.description(),
+                        t.amount()
+                ));
+    }
+
+
 }
