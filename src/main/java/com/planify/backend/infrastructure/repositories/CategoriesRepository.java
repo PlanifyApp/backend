@@ -6,9 +6,65 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public interface CategoriesRepository extends ReactiveCrudRepository<CategoryEntity, Long> {
+
+    // 3. Total Presupuesto
+    @Query("""
+            SELECT COALESCE(SUM(budgeted), 0)
+            FROM categories
+            WHERE user_id = :userId
+            """)
+    Mono<BigDecimal> getTotalBudget(Long userId);
+
+    // 13. Gastos por categoría
+    @Query("""
+            SELECT
+                c.name AS category,
+                SUM(t.amount) AS total
+            FROM categories c
+            LEFT JOIN transactions t ON t.category_id = c.id AND t.type = 'expense'
+            WHERE c.user_id = :userId
+            GROUP BY c.id, c.name
+            """)
+    Flux<CategoryExpenseProjection> getExpensesByCategory(Long userId);
+
+    // 14. Presupuesto por categoría
+    @Query("""
+            SELECT name AS category, budgeted
+            FROM categories
+            WHERE user_id = :userId
+            """)
+    Flux<CategoryBudgetProjection> getBudgetByCategory(Long userId);
+
+    // 15. Gastos (solo expense)
+    @Query("""
+            SELECT
+                c.name AS category,
+                SUM(t.amount) AS amount
+            FROM transactions t
+            LEFT JOIN categories c ON c.id = t.category_id
+            WHERE t.user_id = :userId
+              AND t.type = 'expense'
+            GROUP BY c.name
+            """)
+    Flux<CategoryExpenseProjection> getExpensesOnly(Long userId);
+
+
+    public interface CategoryExpenseProjection {
+        String getCategory();
+        BigDecimal getTotal();
+    }
+
+    public interface CategoryBudgetProjection {
+        String getCategory();
+        BigDecimal getBudgeted();
+    }
+
+
+
 
     @Query("""
     UPDATE categories

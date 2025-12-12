@@ -1,6 +1,7 @@
 package com.planify.backend.application.use_cases;
 
 import com.planify.backend.application.dtos.SavingCreateDTO;
+import com.planify.backend.application.dtos.SavingResponseDTO;
 import com.planify.backend.application.dtos.SavingUpdateDTO;
 import com.planify.backend.domain.models.SavingEntity;
 import com.planify.backend.infrastructure.repositories.SavingsRepository;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -63,5 +66,24 @@ public class SavingsService {
 
     public Mono<Void> delete(Long id) {
         return savingsRepository.deleteById(id);
+    }
+
+    // Endpoint filtrado
+    public Flux<SavingResponseDTO> searchSavingsDTO(Long userId, String search, LocalDate start, LocalDate end) {
+        return savingsRepository.findByUserIdAndSearchAndDateRange(userId, search, start, end)
+                .map(this::toResponseDTO);
+    }
+
+    private SavingResponseDTO toResponseDTO(SavingEntity e) {
+        return new SavingResponseDTO(
+                e.getId(),
+                e.getUserId(),
+                e.getSavingName(), // ahora en DTO se llama description
+                e.getGoal(),
+                e.getInitialBalance(),
+                e.getExpectedDeposit(),
+                e.getTargetDate(),
+                e.getIcon()
+        );
     }
 }
