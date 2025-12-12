@@ -110,12 +110,9 @@ public class UsersService {
     public Mono<Void> deleteUser(Integer id) {
         return usersRepository.findById(id.longValue())
                 .switchIfEmpty(Mono.error(new RuntimeException("Usuario no encontrado")))
-                .flatMap(user -> {
-                    user.setRole("INACTIVE");
-                    return usersRepository.save(user);
-                })
-                .then();
+                .flatMap(user -> usersRepository.delete(user));
     }
+
 
 
     public Mono<UsersEntity> authenticate(String email, String password) {

@@ -1,6 +1,7 @@
 package com.planify.backend.application.use_cases;
 import com.planify.backend.application.dtos.CreateDebtDTO;
 import com.planify.backend.application.dtos.DebtResponseDTO;
+import com.planify.backend.application.dtos.DebtResponseWithDescriptionDTO;
 import com.planify.backend.application.dtos.UpdateDebtDTO;
 import com.planify.backend.domain.models.DebtEntity;
 import com.planify.backend.infrastructure.repositories.DebtRepository;
@@ -8,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,49 @@ public class DebtService {
 
         return debtRepository.save(entity)
                 .map(this::toResponse);
+    }
+
+    private DebtResponseWithDescriptionDTO toDescriptionResponse(DebtEntity e) {
+        int remaining = e.getCurrentDebt() - e.getPrincipalAmount();
+        return new DebtResponseWithDescriptionDTO(
+                e.getId(),
+                e.getUserId(),
+                e.getName(), // name -> description
+                e.getCurrentDebt(),
+                e.getPrincipalAmount(),
+                e.getMinimumPayment(),
+                e.getDueDate(),
+                e.getIcon(),
+                remaining
+        );
+    }
+
+    public Flux<DebtResponseWithDescriptionDTO> searchDebts(Long userId,
+                                                            String description,
+                                                            LocalDate startDate,
+                                                            LocalDate endDate) {
+
+        // Si no hay filtros, devuelve todas
+        if (description == null && startDate == null && endDate == null) {
+            return debtRepository.findAllByUserId(userId)
+                    .map(this::toDescriptionResponse);
+        }
+
+        // Solo descripción
+        if (description != null && startDate == null && endDate == null) {
+            return debtRepository.findByUserIdAndDescription(userId, description)
+                    .map(this::toDescriptionResponse);
+        }
+
+        // Solo rango de fechas
+        if (description == null && startDate != null && endDate != null) {
+            return debtRepository.findByUserIdAndDueDateBetween(userId, startDate, endDate)
+                    .map(this::toDescriptionResponse);
+        }
+
+        // Combinado: descripción + rango de fechas
+        return debtRepository.findByUserIdAndDescriptionAndDateRange(userId, description, startDate, endDate)
+                .map(this::toDescriptionResponse);
     }
 
     // Obtener deudas de un usuario + remainingDebt
